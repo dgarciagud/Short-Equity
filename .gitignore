@@ -1,0 +1,5 @@
+external/
+data/*.parquet
+results/panels/
+results/returns/
+__pycache__/

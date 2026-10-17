@@ -1,0 +1,21 @@
+dataset,freq,test,variable,coef,t_NW,n_periodos
+yahoo,M,lider->rezagado (sector),lead,0.0497,2.0346,270
+yahoo,M,lider->rezagado (sector),own,0.0215,0.6369,270
+yahoo,M,cliente->proveedor (accion),cust,0.0408,1.9227,271
+yahoo,M,cliente->proveedor (accion),last,-0.0240,-1.8407,271
+yahoo,M,cliente->proveedor (accion),sec_last,0.1922,2.3803,271
+yahoo,W,lider->rezagado (sector),lead,0.0208,1.4486,1178
+yahoo,W,lider->rezagado (sector),own,-0.0255,-1.5773,1178
+yahoo,W,cliente->proveedor (accion),cust,0.0133,2.6030,1183
+yahoo,W,cliente->proveedor (accion),last,-0.0051,-0.6467,1183
+yahoo,W,cliente->proveedor (accion),sec_last,-0.0196,-0.5144,1183
+algoseek,M,lider->rezagado (sector),lead,-0.0605,-0.8270,57
+algoseek,M,lider->rezagado (sector),own,0.0103,0.1693,57
+algoseek,M,cliente->proveedor (accion),cust,0.0405,0.7393,58
+algoseek,M,cliente->proveedor (accion),last,-0.0098,-0.3814,58
+algoseek,M,cliente->proveedor (accion),sec_last,0.1045,0.5382,58
+algoseek,W,lider->rezagado (sector),lead,0.0399,1.0487,252
+algoseek,W,lider->rezagado (sector),own,0.0099,0.2486,252
+algoseek,W,cliente->proveedor (accion),cust,0.0130,1.1631,256
+algoseek,W,cliente->proveedor (accion),last,0.0057,0.3747,256
+algoseek,W,cliente->proveedor (accion),sec_last,-0.0489,-0.7584,256
