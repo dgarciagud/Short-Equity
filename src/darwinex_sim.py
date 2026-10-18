@@ -23,8 +23,11 @@ from cpz_mispricing import bins, factors, load, size_filter, tstat
 OUT = data.ROOT / "results" / "cpz"
 DAYS_PER_MONTH = 365.25 / 12
 # MT5 swap_mode 5 (annual interest on current price, /360 per day): long -5.50 %, short +2.10 %
+ACCOUNT = __import__("os").environ.get("DARWINEX_ACCOUNT", "classic")  # classic | zero
 SWAP_LONG = -0.055 / 360 * DAYS_PER_MONTH    # -0.465 %/month
 SWAP_SHORT = 0.021 / 360 * DAYS_PER_MONTH    # +0.178 %/month
+if ACCOUNT == "zero":                        # Darwinex Zero: no swaps at all
+    SWAP_LONG = SWAP_SHORT = 0.0
 # short-only books: the credit is (T-bill - markup); markup assumed 1.7 %/yr (T-bill ~3.8 %)
 SHORT_MARKUP = 0.017 / 12
 # measured in MT5 (spread_history.csv, 8-16 Oct 2026, 420 S&P 500 stock CFDs):
@@ -79,7 +82,10 @@ def main():
                 b = book(d, mask, hedge, n)
                 if hedge == "sin cobertura":
                     gross = -b.r_short
-                    fin = pd.Series(-SHORT_MARKUP, index=b.index)
+                    if ACCOUNT == "zero":   # no interest on the short proceeds: lose the T-bill
+                        fin = -rf.reindex(b.index).fillna(0)
+                    else:
+                        fin = pd.Series(-SHORT_MARKUP, index=b.index)
                     trade = 2 * cost_trade * b.to_s
                 else:
                     gross = b.r_long - b.r_short
@@ -98,7 +104,7 @@ def main():
                                  "rotacion_corto": b.to_s.mean(), "meses": len(s)})
     res = pd.DataFrame(rows)
     res["half_spread_bp"] = SPREAD * 1e4
-    res.to_csv(OUT / f"darwinex_classic_spread{round(SPREAD * 1e4)}.csv", index=False, float_format="%.4f")
+    res.to_csv(OUT / f"darwinex_{ACCOUNT}_spread{round(SPREAD * 1e4)}.csv", index=False, float_format="%.4f")
     pd.set_option("display.width", 250)
     for v in ("media_%mes", "t", "sharpe", "vol_anual_%", "max_dd_%", "peor_mes_%", "post2000_%mes"):
         for lab in ("bruto", "neto Darwinex"):

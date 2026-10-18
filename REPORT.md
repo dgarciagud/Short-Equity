@@ -348,6 +348,20 @@ Los spreads reales (más anchos de lo supuesto) se compensan en parte con unos s
 * No pasar de 1,5× por lado: el peor mes histórico es del −15 % al −22 %, y el drawdown, del −36 % al −53 %.
 * Mínimo 1 acción: 98 de las 420 acciones cotizan por encima de 300 $. Entre las candidatas, priorizar precios bajos o asumir pesos desiguales.
 
+
+### 11.b Darwinex Zero (sin swaps)
+
+Darwinex Zero no aplica swaps; el resto de condiciones son las mismas: comisión, retención del 15 % en dividendos largos, cargo de dividendos en cortos y stop-out al 50 %. Sin swaps desaparece el −0,29 %/mes del libro largo/corto. Un corto sin cobertura tampoco cobra interés por el efectivo de la venta, y pierde el tipo del T-bill frente a una venta en corto real.
+
+| N = 10 por lado (8 pb por lado; entre paréntesis, 12 pb) | %/mes neto | Sharpe | Drawdown máx. | Desde 2000 |
+|---|---:|---:|---:|---:|
+| **SYY M: corto sobrevaloradas / largo infravaloradas** | **1,38 (1,35)** | **0,82** | −49 % | 0,97 |
+| **SYY M: corto sobrevaloradas / largo SPY** | **0,96 (0,94)** | 0,75 | **−28 %** | 0,98 |
+| Perdedores y sobrevalorados / largo infravaloradas | 1,40 (1,36) | 0,74 | −73 % | 0,86 |
+| SYY M, solo corto | −0,08 | −0,04 | −94 % | 0,23 |
+
+**Coste de préstamo de las acciones en corto.** Ni las condiciones que facilitaste ni la documentación pública de Darwinex mencionan una comisión de préstamo (*borrow fee*) explícita para los CFD de acciones. En Classic el coste del corto va dentro del swap. En una cuenta real ese coste suele ser de 0,25-0,5 %/año para acciones fáciles de prestar y de varios puntos para las difíciles, justo las más sobrevaloradas y con alta IVOL. Sensibilidad para "SYY M / largo SPY" en Zero: con un coste implícito de 1 %/año, 0,88 %/mes; con 3 %/año, 0,71 %/mes. El riesgo práctico más relevante es otro: que el valor **no esté disponible para cortar**. En ese caso hay que sustituirlo por el siguiente candidato de la lista.
+
 **Pendiente para operar:** (1) fundamentales actuales para calcular M hoy (los datos de CPZ acaban en 2016); (2) confirmar la disponibilidad para cortar de cada valor (columna "Available to sell short"); (3) el coste exacto del swap del CFD SP500, que va en modo puntos y no se puede convertir a % sin el valor del punto.
 
 ---
