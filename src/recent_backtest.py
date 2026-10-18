@@ -50,12 +50,16 @@ CF_COLS = {"assets": "assets", "liabilities": "liabilities",
            "ppe": "propertyplantandequipmentnet", "inventory": "inventorynet",
            "net_income": "netincomeloss", "cfo": "netcashprovidedbyusedinoperatingactivities",
            "gross_profit": "grossprofit", "revenue": "revenues", "cogs": "costofrevenue",
-           "shares": "weightedaveragenumberofdilutedsharesoutstanding"}
+           "shares": "weightedaveragenumberofdilutedsharesoutstanding",
+           "cur_assets": "assetscurrent", "cur_liab": "liabilitiescurrent", "public_float": "public_float"}
 CF_PANELS = {"instant": (None, ["assets", "liabilities", "liab_equity", "equity", "cash", "st_invest",
-                                "lt_debt", "st_debt", "ppe", "inventory"]),
+                                "lt_debt", "st_debt", "ppe", "inventory", "cur_assets", "cur_liab"]),
+             "float": (None, ["public_float"]),
              "quarterly": ((80, 100), ["net_income"]), "shares": ((80, 100), ["shares"]),
              "annual": ((350, 380), ["net_income", "cfo", "gross_profit", "revenue", "cogs"])}
 _CF = {}
+SPLIT_SAFE_NI = True   # NI from same-filing comparatives (False reproduces the split-contaminated version)
+EXTRA = False          # also build O-score / CHS inputs (pit_backtest.py)
 CF_UNIVERSE = None   # [(ticker of the cached facts file, cik)]; default: today's Darwinex universe
 
 
@@ -80,6 +84,7 @@ def load_cf(name):
         x["start"] = pd.to_datetime(x.start)
         x["filed"] = pd.to_datetime(x.filed)
         x["days"] = (x.end - x.start).dt.days
+        _CF["raw"] = x
         x = x.sort_values(["filed", "prio"]).drop_duplicates(["cik", "key", "start", "end"], keep="first")
         _CF["facts"] = x
     x = _CF["facts"]
@@ -91,6 +96,22 @@ def load_cf(name):
     ann = x.groupby(["cik", "end"]).filed.max()
     wide = wide.rename(columns=CF_COLS).join(ann.rename("announcement_date")).reset_index()
     return wide.rename(columns={"end": "fiscal_quarter_end"})
+
+
+def share_growth_cf():
+    """Diluted-share growth vs the same quarter a year earlier, both taken from the SAME filing
+    (the prior-year comparative is restated for splits, so a split is not read as issuance)."""
+    load_cf("shares")
+    x = _CF["raw"]
+    x = x[(x.key == "shares") & (x.days >= 80) & (x.days <= 100)]
+    cur = x.sort_values(["filed", "prio"]).drop_duplicates(["cik", "end"], keep="first")
+    m = cur.merge(x[["cik", "filed", "end", "val"]], on=["cik", "filed"], suffixes=("", "_1"))
+    gap = (m.end - m.end_1).dt.days
+    m = m[(gap >= 355) & (gap <= 375)].drop_duplicates(["cik", "end"])
+    m["NI"] = np.log(m.val / m.val_1).where((m.val > 0) & (m.val_1 > 0))
+    m["ann"] = m.filed
+    m["q"] = (m.end - pd.Timedelta(days=45)).dt.to_period("Q")
+    return m.sort_values("end").drop_duplicates(["cik", "q"], keep="last")[["cik", "q", "ann", "NI"]]
 
 
 def load(name, base=FRAMES):
@@ -120,7 +141,10 @@ def feature_tables(base=FRAMES):
         + first(ins, ["debtcurrent", "longtermdebtcurrent", "shorttermborrowings"]).fillna(0)
     ins["ppe"] = first(ins, ["propertyplantandequipmentnet"])
     ins["inv"] = first(ins, ["inventorynet"])
-    bs = ins[["cik", "q", "ann", "A", "L", "cash", "debt", "ppe", "inv"]]
+    ins["BE"] = eq
+    ins["CA"] = first(ins, ["assetscurrent"])
+    ins["CL"] = first(ins, ["liabilitiescurrent"])
+    bs = ins[["cik", "q", "ann", "A", "L", "cash", "debt", "ppe", "inv", "BE", "CA", "CL"]]
     t_ins = lagged(bs, ["A", "ppe", "inv"], 4, "_1")
     t_ins["AG"] = t_ins.A / t_ins.A_1 - 1
     t_ins["NOA"] = ((t_ins.A - t_ins.cash) - (t_ins.L - t_ins.debt)) / t_ins.A_1
@@ -132,10 +156,13 @@ def feature_tables(base=FRAMES):
     qn = qn[["cik", "q", "ann", "ni"]].merge(assets.assign(q=assets.q + 1), on=["cik", "q"], how="left")
     qn["ROA"] = qn.ni / qn.A
 
-    sh = load("shares", base)
-    sh["sh"] = sh["weightedaveragenumberofdilutedsharesoutstanding"]
-    sh = lagged(sh[["cik", "q", "ann", "sh"]], ["sh"], 4, "_1")
-    sh["NI"] = np.log(sh.sh / sh.sh_1).where((sh.sh > 0) & (sh.sh_1 > 0))
+    if base == "companyfacts" and SPLIT_SAFE_NI:
+        sh = share_growth_cf()
+    else:
+        sh = load("shares", base)
+        sh["sh"] = sh["weightedaveragenumberofdilutedsharesoutstanding"]
+        sh = lagged(sh[["cik", "q", "ann", "sh"]], ["sh"], 4, "_1")
+        sh["NI"] = np.log(sh.sh / sh.sh_1).where((sh.sh > 0) & (sh.sh_1 > 0))
 
     an = load("annual", base)
     an["ni"] = first(an, ["netincomeloss", "profitloss"])
@@ -147,8 +174,41 @@ def feature_tables(base=FRAMES):
     an = an.merge(assets.assign(q=assets.q + 4).rename(columns={"A": "A_1"}), on=["cik", "q"], how="left")
     an["AC"] = (an.ni - an.cfo) / an[["A", "A_1"]].mean(axis=1)
     an["PROF"] = an.gp / an.A
-    return {"ins": (t_ins, ["AG", "NOA", "DPI2A"]), "qn": (qn, ["ROA"]), "sh": (sh, ["NI"]),
-            "an": (an, ["AC", "PROF"])}
+    tables = {"ins": (t_ins, ["AG", "NOA", "DPI2A"]), "qn": (qn, ["ROA"]), "sh": (sh, ["NI"]),
+              "an": (an, ["AC", "PROF"])}
+    if EXTRA:
+        tables.update(distress_inputs(bs, qn, an))
+    return tables
+
+
+def distress_inputs(bs, qn, an):
+    """Ohlson (1980) O-score and the accounting inputs of the Campbell-Hilscher-Szilagyi (2008)
+    failure probability (its market inputs are added in pit_backtest.py)."""
+    o = an[["cik", "q", "ann", "ni", "cfo"]].merge(bs[["cik", "q", "ann", "A", "L", "CA", "CL"]],
+                                                   on=["cik", "q"], how="left", suffixes=("", "_bs"))
+    o["ann"] = o[["ann", "ann_bs"]].max(axis=1)
+    o = lagged(o, ["ni"], 4, "_1")
+    A = o.A.where(o.A > 0)
+    chin = (o.ni - o.ni_1) / (o.ni.abs() + o.ni_1.abs())
+    o["OSC"] = (-0.407 * np.log(A) + 6.03 * o.L / A - 1.43 * (o.CA - o.CL) / A + 0.0757 * o.CL / o.CA
+                - 2.37 * o.ni / A - 1.83 * o.cfo / o.L.where(o.L > 0)
+                + 0.285 * ((o.ni < 0) & (o.ni_1 < 0)) - 1.72 * (o.L > o.A) - 0.521 * chin)
+    # quarterly NI with the fiscal Q4 (rarely tagged as a 3-month fact) = annual - Q1..Q3
+    q = qn[["cik", "q", "ann", "ni"]].copy()
+    yr = an[["cik", "q", "ann", "ni"]].rename(columns={"ni": "ni_y", "ann": "ann_y"})
+    prior = q[["cik", "q", "ni"]]
+    tri = yr.copy()
+    for k in (1, 2, 3):
+        tri = tri.merge(prior.assign(q=prior.q + k).rename(columns={"ni": f"p{k}"}), on=["cik", "q"], how="left")
+    tri["ni"] = tri.ni_y - tri[["p1", "p2", "p3"]].sum(axis=1, min_count=3)
+    q4 = tri.dropna(subset=["ni"])[["cik", "q", "ann_y", "ni"]].rename(columns={"ann_y": "ann"})
+    q = pd.concat([q, q4[~q4.set_index(["cik", "q"]).index.isin(q.set_index(["cik", "q"]).index)]])
+    q = q.sort_values("q").drop_duplicates(["cik", "q"], keep="last")
+    q = lagged(lagged(lagged(q, ["ni"], 1, "_1"), ["ni"], 2, "_2"), ["ni"], 3, "_3")
+    # CHS weights: quarter lags decay by phi^3 = 1/2
+    q["NIW"] = (1 - 0.5) / (1 - 0.5 ** 4) * (q.ni + 0.5 * q.ni_1 + 0.25 * q.ni_2 + 0.125 * q.ni_3)
+    b = bs[["cik", "q", "ann", "L", "cash", "BE"]]
+    return {"osc": (o, ["OSC"]), "niw": (q, ["NIW"]), "bal": (b, ["L", "cash", "BE"])}
 
 
 def asof(tables, t, max_age_q=6):

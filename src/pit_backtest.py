@@ -85,7 +85,76 @@ def monthly_returns(cik_of):
     return pd.DataFrame(out), spy
 
 
-def run(name, members_at, ret, spy, tables, half_spread, sector):
+SIGN11 = {**rb.SIGN, "DIST": 1, "OSC": 1, "CEI": 1}
+WINS = ["NIMTAAVG", "TLMTA", "EXRETAVG", "SIGMA", "RSIZE", "CASHMTA", "MB"]
+
+
+def chs(f, t, mkt):
+    """Campbell-Hilscher-Szilagyi (2008) 12-month failure score (PRICE term omitted: S&P 500 prices
+    are almost always above its $15 cap). ME = last public float carried forward with the stock's
+    total return (data/sec facts 'public_float')."""
+    me = np.exp(f.lnN + mkt["lntr"].loc[t].reindex(f.index))
+    mta = me + f.L
+    x = pd.DataFrame({"NIMTAAVG": f.NIW / mta, "TLMTA": f.L / mta, "CASHMTA": f.cash / mta,
+                      "EXRETAVG": mkt["exretavg"].loc[t].reindex(f.index),
+                      "SIGMA": mkt["sigma"].loc[t].reindex(f.index), "RSIZE": np.log(me),
+                      "MB": me / (f.BE + 0.1 * (me - f.BE)).clip(lower=1.0)})
+    x = x.clip(x.quantile(0.05), x.quantile(0.95), axis=1)
+    return (-20.264 * x.NIMTAAVG + 1.416 * x.TLMTA - 7.129 * x.EXRETAVG + 1.411 * x.SIGMA
+            - 0.045 * x.RSIZE - 2.132 * x.CASHMTA + 0.075 * x.MB)
+
+
+def daily_returns(cik_of):
+    """Daily returns per CIK (same source priority as monthly_returns), for CHS volatility."""
+    px = pd.read_parquet(data.DATA / "prices_sp500_pit.parquet")
+    yret = px.pct_change(fill_method=None)
+    a = pd.read_parquet(data.ALGOSEEK, columns=["date", "symbol", "close", "adj_factor"])
+    a["date"] = pd.to_datetime(a.date)
+    a["tr"] = a.close * a.adj_factor
+    aret = a.pivot(index="date", columns="symbol", values="tr").pct_change(fill_method=None).reindex(yret.index)
+    out = {}
+    for src, r in (("yahoo", yret), ("algoseek", aret)):
+        cols = [c for c in r if c in cik_of and not (src == "yahoo" and c in RECYCLED)]
+        cols.sort(key=lambda c: -r[c].notna().sum())
+        for c in cols:
+            k = cik_of[c]
+            out[k] = r[c] if k not in out else out[k].fillna(r[c])
+    return pd.DataFrame(out)
+
+
+def market_inputs(ret, spy, cik_of):
+    phi = 2 ** (-1 / 3)
+    exret = np.log1p(ret).sub(np.log1p(spy), axis=0)
+    w = np.array([phi ** k for k in range(12)]) * (1 - phi) / (1 - phi ** 12)
+    exretavg = sum(w[k] * exret.shift(k).fillna(0) for k in range(12)).where(exret.rolling(12).count() >= 6)
+    d = daily_returns(cik_of)
+    sq = (d ** 2).rolling(63, min_periods=20)
+    sigma = np.sqrt(252 * sq.sum() / (sq.count() - 1)).resample("ME").last().reindex(ret.index)
+    lntr = np.log1p(ret).fillna(0).cumsum().where(ret.notna())
+    return {"exretavg": exretavg, "sigma": sigma, "lntr": lntr}
+
+
+def float_table(lntr):
+    """Public float -> log 'total-return shares' lnN = log(float) - log TR index at the float date,
+    and Daniel-Titman composite issuance CEI = annualised change of lnN over 5 (else 4, 3) years."""
+    fl = rb.load("float", "companyfacts")
+    fl = fl[fl.public_float > 0].copy()
+    m = fl.end.dt.to_period("M").dt.to_timestamp("M")
+    lt = lntr.stack().rename("lntr_m").reset_index()
+    lt.columns = ["m", "cik", "lntr_m"]
+    fl = fl.assign(m=m).merge(lt, on=["m", "cik"], how="left")
+    fl["lnN"] = np.log(fl.public_float) - fl.lntr_m
+    pairs = fl[["cik", "end", "lnN"]].merge(fl[["cik", "end", "lnN"]], on="cik", suffixes=("", "_0"))
+    pairs["yrs"] = ((pairs.end - pairs.end_0).dt.days / 365.25)
+    pairs["k"] = pairs.yrs.round()
+    pairs = pairs[pairs.k.isin([3, 4, 5]) & ((pairs.yrs - pairs.k).abs() < 0.2)]
+    pairs = pairs.sort_values("k").drop_duplicates(["cik", "end"], keep="last")
+    pairs["CEI"] = (pairs.lnN - pairs.lnN_0) / pairs.k
+    fl = fl.merge(pairs[["cik", "end", "CEI"]], on=["cik", "end"], how="left")
+    return fl[["cik", "q", "ann", "lnN", "CEI"]]
+
+
+def run(name, members_at, ret, spy, tables, half_spread, sector, signs=rb.SIGN, min_k=5, mkt=None):
     fwd = ret.shift(-1)
     mom = np.expm1(np.log1p(ret).shift(1).rolling(11, min_periods=11).sum())
     months = ret.index[(ret.index >= "2012-01-31") & (ret.index <= ret.index[-2])]
@@ -98,8 +167,10 @@ def run(name, members_at, ret, spy, tables, half_spread, sector):
         f["fwd"] = fwd.loc[t].reindex(f.index)
         n_px = fwd.loc[t].reindex(list(mem)).notna().sum()
         f = f.dropna(subset=["fwd"])
-        pct = pd.DataFrame({k: (f[k] * s).rank(pct=True) for k, s in rb.SIGN.items()})
-        f["M"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= 5)
+        if "DIST" in signs:
+            f["DIST"] = chs(f, t, mkt)
+        pct = pd.DataFrame({k: (f[k] * s).rank(pct=True) for k, s in signs.items()})
+        f["M"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= min_k)
         f = f.dropna(subset=["M"])
         f["sector"] = sector.reindex(f.index).fillna("Unknown")
         panel.append(f.assign(date=t))
@@ -138,11 +209,12 @@ def run(name, members_at, ret, spy, tables, half_spread, sector):
     pan.to_parquet(out / "panel.parquet")
 
     ics = []
-    for k, sgn in list(rb.SIGN.items()) + [("M", 1)]:
+    for k, sgn in list(signs.items()) + [("M", 1)]:
         ic = pan.groupby("date").apply(lambda g: (g[k] * sgn).rank().corr(g.fwd.rank()))
         q5 = pan.groupby("date").apply(lambda g: g.fwd[(g[k] * sgn).rank(pct=True) > 0.8].mean() - g.fwd.mean())
         ics.append({"anomalia": k, "IC_medio": ic.mean(), "t_IC": ic.mean() / ic.std() * np.sqrt(ic.count()),
-                    "Q5_menos_EW_%mes": 100 * q5.mean(), "t_Q5": q5.mean() / q5.std() * np.sqrt(q5.count())})
+                    "Q5_menos_EW_%mes": 100 * q5.mean(), "t_Q5": q5.mean() / q5.std() * np.sqrt(q5.count()),
+                    "cobertura": pan[k].notna().mean()})
     pd.DataFrame(ics).to_csv(out / "anomalias.csv", index=False, float_format="%.4f")
 
     def cost(k):
@@ -193,10 +265,16 @@ def main():
         if tic:
             files.append((tic, cik))
     rb.CF_UNIVERSE = files
+    rb.EXTRA = True
     tables = rb.feature_tables("companyfacts")
+    rb.SPLIT_SAFE_NI = False
+    tables_bug = rb.feature_tables("companyfacts")
+    rb.SPLIT_SAFE_NI = True
     print(f"companyfacts: {len(files)} CIKs")
 
     ret, spy = monthly_returns(cik_of)
+    mkt = market_inputs(ret, spy, cik_of)
+    tables["fl"] = (float_table(mkt["lntr"]), ["lnN", "CEI"])
     spr = (uni.set_index("cik").avg_spread_bps / 2 / 1e4).to_dict()
     sic = {int(k): v for k, v in json.loads((SEC / "sic.json").read_text()).items()}
     gics = data.sector_labels()
@@ -215,13 +293,21 @@ def main():
         return {cik_of[x] for x in lst if x in cik_of}
 
     out = {}
-    for name, fn in (("pit", pit), ("survivor_mismo_pipeline", lambda t: sur_ciks)):
-        r, res = run(name, fn, ret, spy, tables, spr, sector)
+    runs = {  # name: (universe, tables, anomalies, minimum available)
+        "pit_8_error_splits": (pit, tables_bug, rb.SIGN, 5),
+        "pit": (pit, tables, rb.SIGN, 5),
+        "survivor_mismo_pipeline": (lambda t: sur_ciks, tables, rb.SIGN, 5),
+        "pit_11": (pit, tables, SIGN11, 7),
+        "survivor_11": (lambda t: sur_ciks, tables, SIGN11, 7),
+    }
+    for name, (fn, tab, sg, k) in runs.items():
+        r, res = run(name, fn, ret, spy, tab, spr, sector, sg, k, mkt)
         out[name] = (r, res)
         print(f"\n== {name}: miembros {r.miembros.mean():.0f}, con precio {r.con_precio.mean():.0f}, "
               f"con M {r.n.mean():.0f}; top10 hoy fuera del índice {100 * r.top10_ya_no_miembro_hoy.mean():.0f}%")
     both = pd.concat([v[1] for v in out.values()])
     both.to_csv(OUT / "pit_vs_survivor.csv", index=False, float_format="%.4f")
+    both = both[both.periodo == "2012-2026"]
     pd.set_option("display.width", 250)
     cols = ["universo", "estrategia", "periodo", "media_%mes", "t", "sharpe", "max_dd_%", "alfa_FF6_mes", "t_alfa"]
     print(both[cols].round(2).to_string(index=False))

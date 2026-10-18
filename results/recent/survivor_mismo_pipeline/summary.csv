@@ -1,28 +1,28 @@
 media_%mes,t,sharpe,vol_%,max_dd_%,peor_mes_%,meses,universo,estrategia,periodo,alfa_FF6_mes,t_alfa
-0.0690,0.7977,0.1910,4.3330,-9.3406,-4.1347,177,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2012-2026,0.0235,0.2528
--0.0351,-0.2416,-0.1156,3.6452,-8.3470,-2.0016,60,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2012-2016,-0.2398,-1.7127
-0.0446,0.4158,0.1567,3.4161,-3.6524,-1.7677,60,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2017-2021,0.1052,0.8449
-0.2041,1.1168,0.4306,5.6871,-9.3009,-4.1347,57,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2022-2026,0.1246,0.6795
-0.0984,0.7125,0.1683,7.0146,-13.6316,-6.9330,177,survivor_mismo_pipeline,"Q1 − Q5, bruto",2012-2026,0.0301,0.2148
-0.0379,0.1559,0.0799,5.6858,-8.6119,-3.3567,60,survivor_mismo_pipeline,"Q1 − Q5, bruto",2012-2016,-0.2488,-1.3025
-0.0946,0.4788,0.1951,5.8184,-7.1444,-3.5950,60,survivor_mismo_pipeline,"Q1 − Q5, bruto",2017-2021,0.1301,0.6532
-0.1660,0.6079,0.2163,9.2094,-13.6316,-6.9330,57,survivor_mismo_pipeline,"Q1 − Q5, bruto",2022-2026,0.0255,0.0936
--0.0545,-0.1999,-0.0429,15.2654,-43.6216,-22.7254,177,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2012-2026,-0.1033,-0.4092
-0.0507,0.1102,0.0552,11.0347,-21.7362,-7.4185,60,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2012-2016,-0.3076,-0.7090
--0.4243,-0.9539,-0.3112,16.3622,-37.2240,-22.7254,60,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2017-2021,-0.1024,-0.2623
-0.2239,0.4490,0.1504,17.8657,-32.0467,-14.2258,57,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2022-2026,-0.2181,-0.3854
--0.1121,-0.4173,-0.0891,15.0911,-49.3111,-22.7254,177,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2012-2026,-0.1768,-0.7095
-0.0259,0.0576,0.0283,10.9818,-21.9545,-7.4185,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2012-2016,-0.3243,-0.7540
--0.4453,-1.0119,-0.3280,16.2907,-37.5133,-22.7254,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2017-2021,-0.1188,-0.3110
-0.0934,0.1878,0.0640,17.5188,-37.5709,-13.8906,57,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2022-2026,-0.3970,-0.7194
-0.2984,0.8414,0.1972,18.1531,-42.5233,-22.2851,177,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2012-2026,0.3011,0.8958
-0.4329,0.7164,0.3812,13.6281,-23.1696,-9.1906,60,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2012-2016,0.1901,0.3553
-0.1023,0.2062,0.0646,19.0035,-31.2960,-22.2851,60,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2017-2021,0.3769,0.6220
-0.3631,0.4860,0.2034,21.4184,-42.5233,-15.1320,57,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2022-2026,0.0129,0.0161
--0.3996,-1.4873,-0.3177,15.0911,-68.3726,-23.0129,177,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2012-2026,-0.4643,-1.8628
--0.2616,-0.5817,-0.2858,10.9818,-29.4883,-7.7060,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2012-2016,-0.6118,-1.4224
--0.7328,-1.6650,-0.5398,16.2907,-44.7161,-23.0129,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2017-2021,-0.4062,-1.0637
--0.1941,-0.3902,-0.1329,17.5188,-44.1242,-14.1781,57,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2022-2026,-0.6844,-1.2404
+0.0842,0.9966,0.2353,4.2949,-8.9003,-3.8227,177,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2012-2026,0.0379,0.4251
+0.0149,0.0956,0.0472,3.7768,-7.4155,-1.6944,60,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2012-2016,-0.1806,-1.2115
+0.0107,0.1133,0.0390,3.2896,-3.5067,-1.7032,60,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2017-2021,0.0548,0.4843
+0.2346,1.3649,0.5045,5.5800,-8.0829,-3.8227,57,survivor_mismo_pipeline,"Q5 vs mercado EW, bruto",2022-2026,0.1725,0.9903
+0.1236,0.8943,0.2105,7.0437,-11.5734,-7.0174,177,survivor_mismo_pipeline,"Q1 − Q5, bruto",2012-2026,0.0571,0.4115
+0.0806,0.3124,0.1635,5.9184,-9.4042,-3.4597,60,survivor_mismo_pipeline,"Q1 − Q5, bruto",2012-2016,-0.2013,-0.9585
+0.0656,0.3357,0.1349,5.8370,-7.5222,-4.1212,60,survivor_mismo_pipeline,"Q1 − Q5, bruto",2017-2021,0.0803,0.4155
+0.2298,0.8902,0.3028,9.1062,-11.5734,-7.0174,57,survivor_mismo_pipeline,"Q1 − Q5, bruto",2022-2026,0.1157,0.4324
+-0.0667,-0.2438,-0.0530,15.1225,-47.4041,-22.7254,177,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2012-2026,-0.1325,-0.5322
+-0.0374,-0.0810,-0.0425,10.5552,-20.4174,-7.9800,60,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2012-2016,-0.3190,-0.7542
+-0.4761,-1.0714,-0.3508,16.2851,-38.9562,-22.7254,60,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2017-2021,-0.1944,-0.4790
+0.3333,0.6672,0.2243,17.8277,-28.8730,-14.2258,57,survivor_mismo_pipeline,"Top10 corto / SPY, neto Zero",2022-2026,-0.1295,-0.2304
+-0.1040,-0.3847,-0.0831,15.0161,-48.2076,-22.7254,177,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2012-2026,-0.1887,-0.7664
+-0.0454,-0.1008,-0.0518,10.5157,-20.0577,-7.9800,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2012-2016,-0.3243,-0.7775
+-0.4920,-1.1241,-0.3638,16.2291,-38.9628,-22.7254,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2017-2021,-0.2116,-0.5357
+0.2427,0.4813,0.1651,17.6413,-33.8013,-13.8906,57,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Zero",2022-2026,-0.2691,-0.4832
+0.2980,0.8458,0.1989,17.9769,-38.7610,-22.2851,177,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2012-2026,0.2778,0.8628
+0.3840,0.6130,0.3404,13.5395,-26.5521,-9.4178,60,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2012-2016,0.1531,0.2898
+0.0704,0.1527,0.0447,18.8788,-28.8530,-22.2851,60,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2017-2021,0.3162,0.5808
+0.4472,0.6014,0.2541,21.1188,-38.7610,-15.1320,57,survivor_mismo_pipeline,"Top10 corto / Bot10 largo, neto Zero",2022-2026,0.1000,0.1263
+-0.3915,-1.4480,-0.3128,15.0161,-67.6819,-23.0129,177,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2012-2026,-0.4761,-1.9341
+-0.3328,-0.7396,-0.3798,10.5157,-31.6164,-8.2675,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2012-2016,-0.6118,-1.4667
+-0.7795,-1.7809,-0.5764,16.2291,-46.0021,-23.0129,60,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2017-2021,-0.4991,-1.2634
+-0.0447,-0.0887,-0.0304,17.6413,-40.7402,-14.1781,57,survivor_mismo_pipeline,"Top10 límite sectorial / SPY, neto Classic",2022-2026,-0.5565,-0.9993
 -0.9441,-1.8918,-0.4393,25.7876,-91.5432,-33.2740,177,survivor_mismo_pipeline,"Referencia: 10 perdedores momentum / SPY, bruto",2012-2026,-0.9603,-2.8348
 -1.0166,-1.4798,-0.7333,16.6357,-57.5147,-14.9169,60,survivor_mismo_pipeline,"Referencia: 10 perdedores momentum / SPY, bruto",2012-2016,-1.2395,-2.3944
 -1.4532,-1.4899,-0.5538,31.4859,-72.0826,-33.2740,60,survivor_mismo_pipeline,"Referencia: 10 perdedores momentum / SPY, bruto",2017-2021,-1.0714,-1.7364

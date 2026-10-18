@@ -65,6 +65,9 @@ CONCEPTS = {
                 "RevenueFromContractWithCustomerIncludingAssessedTax", "SalesRevenueNet"],
     "cogs": ["CostOfRevenue", "CostOfGoodsAndServicesSold", "CostOfGoodsSold"],
     "shares": ["WeightedAverageNumberOfDilutedSharesOutstanding"],
+    "cur_assets": ["AssetsCurrent"],
+    "cur_liab": ["LiabilitiesCurrent"],
+    "public_float": ["dei:EntityPublicFloat"],      # cover page of the 10-K, as of the last Q2 end
 }
 FLOW = {"net_income", "cfo", "gross_profit", "revenue", "cogs", "shares"}
 
@@ -83,20 +86,21 @@ def cik_map():
 def extract(facts):
     """Keep only the concepts we need: rows (key, start, end, val, filed, form)."""
     rows = []
-    gaap = facts.get("facts", {}).get("us-gaap", {})
+    ns = facts.get("facts", {})
     for key, names in CONCEPTS.items():
         for prio, name in enumerate(names):
-            node = gaap.get(name)
+            tax, name = name.split(":") if ":" in name else ("us-gaap", name)
+            node = ns.get(tax, {}).get(name)
             if not node:
                 continue
             unit = "shares" if key == "shares" else "USD"
             for f in node.get("units", {}).get(unit, []):
                 if f.get("form", "").startswith(("10-K", "10-Q", "20-F", "40-F")):
-                    rows.append((key, prio, f.get("start"), f["end"], f["val"], f["filed"], f["form"]))
+                    rows.append((key, prio, f.get("start"), f["end"], float(f["val"]), f["filed"], f["form"]))
     return pd.DataFrame(rows, columns=["key", "prio", "start", "end", "val", "filed", "form"])
 
 
-def download(tickers, cmap, max_age_days=6):
+def download(tickers, cmap, max_age_days=6, force=False):
     out = SEC / "facts"
     out.mkdir(parents=True, exist_ok=True)
     s = requests.Session()
@@ -110,7 +114,7 @@ def download(tickers, cmap, max_age_days=6):
         f = out / f"{t}.parquet"
         old = pd.read_parquet(f) if f.exists() else None
         thin = old is None or (old.key == "assets").sum() < 8
-        if not thin and time.time() - f.stat().st_mtime < max_age_days * 86400:
+        if not force and not thin and time.time() - f.stat().st_mtime < max_age_days * 86400:
             continue
         for attempt in range(4):
             try:
@@ -187,6 +191,8 @@ def shares_growth(d, end):
         return np.nan
     c = cur.iloc[0]
     prev = x[((x.end - (end - pd.Timedelta(days=365))).abs().dt.days <= 15) & ((x.days - c.days).abs() <= 15)]
+    # prefer the comparative restated in the same filing (split-adjusted), else the latest filing
+    prev = prev.assign(same=prev.filed == c.filed).sort_values(["same", "filed"])
     if prev.empty or c.val <= 0 or prev.val.iloc[-1] <= 0:
         return np.nan
     return np.log(c.val / prev.val.iloc[-1])

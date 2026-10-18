@@ -19,7 +19,7 @@ la parrilla completa en `results/grid_stats.csv`) y gráficos en `figures/`.
 | ¿FIP es mejor que el momentum corto clásico o que los perdedores de ID alto? | **Sin evidencia en mis datos, pero el paper sí lo muestra.** En mis muestras la diferencia frente a MOM o DISC es pequeña, de signo variable y casi nunca significativa. Sin embargo, mi muestra sin sesgo (AlgoSeek) solo cubre 5 años y no tiene potencia para detectar el efecto. Da, Gurun y Warachka (2014), con CRSP 1927-2007 sin sesgo, encuentran que los perdedores de caída continua rinden ~6 pp menos en 6 meses que los de caída brusca, también en grandes empresas aunque con menos fuerza (§4). |
 | ¿Qué perdedores conviene cortar? (Chen-Pelger-Zhu, CRSP 1967-2016, **sin sesgo**) | **Los perdedores que además están sobrevalorados** según la puntuación de Stambaugh, Yu y Yuan. En el Top 500 por capitalización (≈S&P 500), el corto cubierto con mercado rinde 0,69 %/mes (t=4,6) y los perdedores **no** sobrevalorados, 0,01 %/mes. La propia puntuación SYY (quintil más sobrevalorado) rinde 0,43 %/mes (t=5,8, Sharpe 0,84), y combinada con alta volatilidad idiosincrática, 0,69 %/mes. Funciona sobre todo tras sentimiento inversor alto y sigue funcionando en 2011-2016, después de la muestra del paper (§10). |
 | ¿Gana dinero el corto de momentum en sí? | **No, después de costes**, en ninguna de las dos muestras: Sharpe neto entre −0,3 y −0,9 cubriendo con el mercado. Parte es sesgo de supervivencia en la muestra larga, pero también pierde en la muestra *point-in-time* 2017-2021. |
-| ¿Sigue funcionando hoy? (S&P 500 histórico 2012-2026, datos SEC) | **Sí, pero de forma modesta.** Con la composición del índice en cada fecha, 10 cortos sobrevalorados cubiertos con SPY ganan +0,42 %/mes neto en Darwinex Zero (t = 1,8) y el quintil sobrevalorado bate al mercado (+0,23 %/mes, t = 2,7). Con los miembros actuales salía ~0: era sesgo de supervivencia. 2017-2021 fue plano y en Classic los swaps se comen casi todo (§12.b). |
+| ¿Sigue funcionando hoy? (S&P 500 histórico 2012-2026, datos SEC) | **Sí, pero de forma modesta.** Con la composición del índice en cada fecha, 10 cortos sobrevalorados cubiertos con SPY ganan +0,47 %/mes neto en Darwinex Zero (t = 2,1) y el quintil sobrevalorado bate al mercado (+0,22 %/mes, t = 2,7). Con los miembros actuales salía ~0: era sesgo de supervivencia. 2017-2021 fue plano y en Classic los swaps se comen más de la mitad (§12.b). Las 3 anomalías de quiebra/emisión que faltaban empeoran el resultado en este universo (§12.c). |
 | ¿Semanal o mensual? | **Mensual.** En semanal la rotación (36-85 % por semana) cuesta 5-10 pp/año y la reversión a 1 semana castiga a los cortos. |
 | Sector como **señal** | El doble filtro (FIP dentro de sector perdedor) **mejora** el FIP mensual: Sharpe −0,28 → +0,06 en Yahoo 1 m, y +0,19 si el sector también cae de forma gradual (ID sectorial bajo). Pero lo hace con la mitad de nombres y más volatilidad, y el momentum sectorial puro (11 sectores GICS) **no** funciona solo. |
 | Difusión lenta | **Existe en la muestra larga.** Líderes → rezagados: t=2,0 (mensual). Clientes → proveedores: t=1,9 (mensual) y 2,6 (semanal). Condicionar mejora mucho el corto relativo, pero no lo vuelve rentable en este universo. |
@@ -399,6 +399,8 @@ Probé sobre CPZ (Top 500, 10 posiciones) una regla con banda: se entra al llega
 
 IC medio de M (correlación de rangos con el retorno del mes siguiente): −0,009 (t = −1,35).
 
+*Nota: esta tabla usa la primera versión de NI, contaminada por los splits (§12.c). Con NI corregida y el mismo universo de supervivientes, el corto Top10/SPY neto Zero da −0,07 %/mes (t −0,2): la conclusión no cambia.*
+
 ![Backtest reciente](figures/fig11_backtest_reciente_2012_2026.png)
 
 **Por anomalía** (quintil "sobrevalorado" menos mercado; un valor negativo es lo que buscan los cortos): solo **NOA** funciona en la dirección esperada (−0,12 %/mes; IC t = −2,5). **Crecimiento de activos (+0,34, t = 2,6), emisión de acciones (+0,24, t = 2,2) y ROA (+0,29, t = 1,8) funcionaron al revés**: las empresas "sobrevaloradas" por estos criterios lo hicieron mejor que el mercado. Accruals, inversión, rentabilidad bruta y momentum quedan cerca de cero.
@@ -423,15 +425,17 @@ IC medio de M (correlación de rangos con el retorno del mes siguiente): −0,00
 
 | Estrategia | Histórico %/mes | t | Sharpe | DD máx. | 2012-16 | 2017-21 | 2022-26 | Actual %/mes (t) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Quintil sobrevalorado vs mercado EW (bruto) | **+0,23** | 2,7 | 0,69 | −7 % | +0,27 | +0,07 | +0,35 | +0,07 (0,8) |
-| Q1 − Q5 (bruto) | **+0,36** | 2,6 | 0,62 | −9 % | +0,44 | +0,30 | +0,34 | +0,10 (0,7) |
-| 10 cortos / SPY, neto Zero | **+0,42** | 1,8 | 0,42 | −27 % | +0,52 | +0,08 | +0,67 | −0,05 (−0,2) |
-| 10 cortos (máx. 3 por sector) / SPY, neto Zero | **+0,43** | 1,9 | 0,44 | −26 % | +0,58 | +0,10 | +0,64 | −0,11 (−0,4) |
-| 10 cortos / 10 largos infravalorados, neto Zero | +0,41 | 1,3 | 0,32 | −25 % | +0,52 | +0,50 | +0,21 | +0,30 (0,8) |
-| 10 cortos (máx. 3 por sector) / SPY, neto Classic | +0,15 | 0,7 | 0,15 | −32 % | +0,29 | −0,19 | +0,35 | −0,40 (−1,5) |
+| Quintil sobrevalorado vs mercado EW (bruto) | **+0,22** | 2,7 | 0,67 | −7 % | +0,27 | +0,07 | +0,35 | +0,08 (1,0) |
+| Q1 − Q5 (bruto) | **+0,34** | 2,4 | 0,60 | −8 % | +0,41 | +0,28 | +0,34 | +0,12 (0,9) |
+| 10 cortos / SPY, neto Zero | **+0,47** | 2,1 | 0,48 | −25 % | +0,57 | +0,07 | +0,78 | −0,07 (−0,2) |
+| 10 cortos (máx. 3 por sector) / SPY, neto Zero | **+0,50** | 2,2 | 0,50 | −25 % | +0,63 | +0,12 | +0,75 | −0,10 (−0,4) |
+| 10 cortos / 10 largos infravalorados, neto Zero | +0,48 | 1,6 | 0,38 | −20 % | +0,56 | +0,53 | +0,35 | +0,30 (0,9) |
+| 10 cortos (máx. 3 por sector) / SPY, neto Classic | +0,21 | 0,9 | 0,21 | −31 % | +0,35 | −0,16 | +0,46 | −0,39 (−1,5) |
 | Referencia: 10 perdedores de momentum / SPY (bruto) | +0,26 | 0,5 | 0,12 | −68 % | −0,02 | −0,20 | +1,02 | −0,94 (−1,9) |
 
-* **Alfa FF5+MOM** del corto Top10/SPY neto Zero: +0,33 %/mes (t = 1,65); con límite sectorial, +0,36 (t = 1,84). Del quintil vs EW: +0,14 (t = 1,6).
+*Emisión de acciones (NI) calculada contra la cifra del año anterior publicada en el mismo informe. La primera versión comparaba informes distintos y leía los *splits* (KO, NVDA, APH, MNST…) como emisiones; corregirlo mejora el corto Top10/SPY de +0,41 a +0,47 %/mes (§12.c).*
+
+* **Alfa FF5+MOM** del corto Top10/SPY neto Zero: +0,35 %/mes (t = 1,85); con límite sectorial, +0,40 (t = 2,06). Del quintil vs EW: +0,14 (t = 1,6).
 * **IC medio de M**: −0,016 (t = −2,2) frente a −0,009 (t = −1,3) con los supervivientes.
 * **El 40 % de los 10 cortos de cada mes son empresas que hoy ya no están en el índice.** Son justo las que el universo actual elimina.
 * **El mercado equiponderado** rinde 1,12 %/mes con la composición histórica frente a 1,47 %/mes con los supervivientes: el sesgo de supervivencia vale ~4 pp/año en este universo.
@@ -440,12 +444,35 @@ IC medio de M (correlación de rangos con el retorno del mes siguiente): −0,00
 ![Histórico vs supervivientes](figures/fig12_pit_vs_supervivientes.png)
 
 **Lectura.**
-1. **El resultado negativo del §12 era sobre todo sesgo de supervivencia.** Con la composición histórica, la puntuación SYY sigue funcionando en 2012-2026: el corto concentrado gana +0,4 %/mes neto en Zero, aunque con significación solo marginal (t ≈ 1,8-1,9, alfa FF6 t ≈ 1,7-1,8). El quintil sobrevalorado bate al mercado con t = 2,7.
+1. **El resultado negativo del §12 era sobre todo sesgo de supervivencia.** Con la composición histórica, la puntuación SYY sigue funcionando en 2012-2026: el corto concentrado gana +0,47-0,50 %/mes neto en Zero (t ≈ 2,1-2,2; alfa FF6 t ≈ 1,9-2,1), una significación justa. El quintil sobrevalorado bate al mercado con t = 2,7.
 2. **Hay que descontar 2012-2016.** Falta un 25 % de los miembros, casi todos adquiridos. Las adquiridas suben por la prima de OPA, así que su ausencia probablemente **infla** los cortos de ese tramo.
-3. **El tramo limpio (2017-2021, cobertura completa) es plano:** +0,08 %/mes en el corto Top10/SPY y +0,07 en el quintil. **2022-2026 (≥94 % de cobertura) es el mejor tramo:** +0,67 %/mes, t = 2,0. Es una señal con rachas largas a cero, no una fuente de alfa constante.
-4. **Darwinex Classic no compensa.** Los swaps (~−0,28 %/mes en la cobertura con SPY) se comen dos tercios del rendimiento: +0,15 %/mes, t = 0,7.
+3. **El tramo limpio (2017-2021, cobertura completa) es plano:** +0,07 %/mes en el corto Top10/SPY y +0,07 en el quintil. **2022-2026 (≥94 % de cobertura) es el mejor tramo:** +0,78 %/mes. Es una señal con rachas largas a cero, no una fuente de alfa constante.
+4. **Darwinex Classic no compensa.** Los swaps (~−0,29 %/mes en la cobertura con SPY) se comen más de la mitad del rendimiento: +0,21 %/mes, t = 0,9.
 5. **Coste de oportunidad del corto puro de momentum:** sin sesgo pasa de −0,9 a +0,3 %/mes, pero con un drawdown del −68 %. Confirma que la puntuación SYY es mejor filtro que el momentum solo.
-6. **Recomendación:** la estrategia es defendible para **Darwinex Zero** (sin swaps) con tamaño prudente, esperando ~0,4 %/mes con mucha incertidumbre (intervalo del 95 % aproximado: −0,05 a +0,9 %/mes) y drawdowns de ~25-30 %. **No para Classic.** Prioridad de mejora: añadir las 3 anomalías de dificultades financieras que faltan.
+6. **Recomendación:** la estrategia es defendible para **Darwinex Zero** (sin swaps) con tamaño prudente, esperando ~0,45 %/mes con mucha incertidumbre (intervalo del 95 % aproximado: 0 a +0,9 %/mes) y drawdowns de ~25 %. **No para Classic.** Añadir las 3 anomalías que faltan **no** ayuda (§12.c).
+
+### 12.c Las 3 anomalías que faltaban: quiebra, O-score y emisión compuesta
+
+Las 11 de Stambaugh-Yu-Yuan, todas calculadas con datos de la SEC fechados por su presentación (`distress_inputs` en `recent_backtest.py`, `chs` y `float_table` en `pit_backtest.py`):
+* **Probabilidad de quiebra (Campbell-Hilscher-Szilagyi, 2008)**, modelo a 12 meses. Usa el beneficio trimestral medio ponderado (el T4 se obtiene como anual − T1-T3), pasivo y caja sobre el valor de mercado del activo, retorno en exceso del S&P 500 ponderado a 12 meses, volatilidad diaria a 3 meses, tamaño y market-to-book. Variables winsorizadas al 5/95 %. Se omite el término de precio (tope de 15 $, irrelevante en el S&P 500).
+* **O-score de Ohlson (1980)**: solo contabilidad anual y balance. No existe para bancos y aseguradoras, que no separan activo y pasivo corriente.
+* **Emisión compuesta (Daniel-Titman, 2006)**: variación anualizada a 5 años (4 o 3 si no hay historia XBRL suficiente) del logaritmo de la capitalización menos el retorno total.
+* **Capitalización**: se toma del *public float* de la portada del 10-K, actualizado con el retorno total de la acción. Así se evita tener que conocer el precio sin ajustar por *splits*. Es una aproximación: el *float* excluye participaciones de control (fundadores).
+* **Cobertura** en el panel: quiebra 59 %, O-score 68 %, emisión compuesta 45 %. La puntuación exige ahora 7 de 11 anomalías.
+
+**Resultados 2012-2026 (S&P 500 histórico, %/mes):**
+
+| Estrategia | 8 anomalías (NI con error de splits) | 8 anomalías (corregidas) | 11 anomalías |
+|---|---:|---:|---:|
+| Quintil sobrevalorado vs EW, bruto | +0,23 (t 2,7) | +0,22 (t 2,7) | +0,14 (t 1,7) |
+| 10 cortos / SPY, neto Zero | +0,41 (t 1,8) | **+0,47 (t 2,1)** | +0,32 (t 1,3) |
+| 10 cortos (máx. 3 por sector) / SPY, neto Zero | +0,43 (t 1,9) | **+0,50 (t 2,2)** | +0,40 (t 1,7) |
+| 10 cortos / 10 largos, neto Zero | +0,40 (t 1,3) | +0,48 (t 1,6) | +0,15 (t 0,5) |
+| IC medio de M | −0,016 (t −2,2) | −0,016 (t −2,2) | −0,009 (t −1,2) |
+
+**Por qué empeora.** En el S&P 500 de 2012-2026, las dos anomalías de quiebra funcionaron **al revés**. El quintil con más riesgo de quiebra rindió +0,29 %/mes más que el mercado (t = 1,5) y el de peor O-score, +0,21 %/mes (t = 2,1). Pasa en los tres subperiodos y no es solo el rebote de 2020: sin 2020 da +0,29 y +0,23 (t = 2,3). La emisión compuesta queda en ~0 (−0,03 %/mes). Las dos medidas de quiebra se parecen entre sí (correlación de rangos 0,6), así que juntas pesan el doble en la dirección equivocada.
+
+**Lectura.** Coincide con la literatura: el efecto de quiebra está muy concentrado en empresas pequeñas e ilíquidas y difíciles de cortar, y se debilitó tras 2008. Dentro del S&P 500, una empresa "en apuros" es grande, suele estar barata y ha rebotado (energía en 2016 y 2021, cíclicas en 2020-2021). **Recomendación: quedarse con las 8 anomalías (con NI corregida).** La quiebra solo serviría como filtro de riesgo (evitar cortos con riesgo de rebote violento), no como señal de corto.
 
 ---
 
