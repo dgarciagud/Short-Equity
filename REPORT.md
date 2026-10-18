@@ -362,6 +362,19 @@ Darwinex Zero no aplica swaps; el resto de condiciones son las mismas: comisión
 
 **Coste de préstamo de las acciones en corto.** Ni las condiciones que facilitaste ni la documentación pública de Darwinex mencionan una comisión de préstamo (*borrow fee*) explícita para los CFD de acciones. En Classic el coste del corto va dentro del swap. En una cuenta real ese coste suele ser de 0,25-0,5 %/año para acciones fáciles de prestar y de varios puntos para las difíciles, justo las más sobrevaloradas y con alta IVOL. Sensibilidad para "SYY M / largo SPY" en Zero: con un coste implícito de 1 %/año, 0,88 %/mes; con 3 %/año, 0,71 %/mes. El riesgo práctico más relevante es otro: que el valor **no esté disponible para cortar**. En ese caso hay que sustituirlo por el siguiente candidato de la lista.
 
+### 11.c Revisión semanal y bandas de tolerancia (`src/buffer_sim.py`)
+
+Probé sobre CPZ (Top 500, 10 posiciones) una regla con banda: se entra al llegar al top 10 y solo se sale al caer por debajo del puesto 15-40, opcionalmente con un límite de cambios al mes. La banda **reduce la rotación a la mitad** (de 2,4 a 1-1,2 nombres al mes), pero **empeora el resultado**. En Darwinex Zero cubierto con SPY, el retorno baja de 0,96 %/mes sin banda a 0,82-0,91 % con banda, y el Sharpe de 0,75 a 0,65-0,75. Con estos costes de operación (0,04 %/mes) compensa más tener siempre el ranking fresco que ahorrar operaciones. Limitar a 2 cambios al mes cuesta unos 0,1 %/mes.
+
+**Regla operativa:** revisar el ranking **cada semana** con los precios y los informes nuevos de la SEC, **sin banda**: se mantiene el top 10, y como mucho se hacen 3 cambios por semana empezando por el peor clasificado. El escalonado semanal no se puede comprobar con datos mensuales. Su ventaja es reducir la dependencia del día de rebalanceo e incorporar antes los informes nuevos.
+
+### 11.d Puntuación en vivo con datos XBRL de la SEC (`src/live_syy.py`)
+
+* **Datos.** API `companyfacts` de la SEC para las 420 acciones del S&P 500 disponibles en Darwinex, usando solo hechos presentados hasta la fecha de cálculo, y precios de Yahoo para el momentum 12-1. El retraso es el legal: 40 días para un 10-Q y 60 para un 10-K en grandes empresas. Es **menor** que el que supone el backtest (4-6 meses), así que es admisible y no hay mirada al futuro.
+* **Incidencias.** (1) La API a veces devuelve datos incompletos, así que las descargas se fusionan con la caché. (2) Para unas 48 empresas, sobre todo utilities, la API aún no incluye el 10-Q de junio de 2026 aunque ya está presentado (NextEra lo presentó el 24-jul). Su dato tiene 6,5 meses en lugar de 3,6, dentro del retraso del backtest; la salida lo marca con la columna `meses_desde_cierre`.
+* **Concentración sectorial.** El ranking puro sitúa 9 utilities entre los 20 primeros: activos operativos netos y crecimiento de activos altos por la inversión en red eléctrica, y ROA bajo. La salida incluye una lista con **un máximo de 3 por sector**, recomendada para no convertir el corto en una apuesta sobre tipos de interés. No está validada en el backtest porque CPZ no tiene sector.
+* **Uso semanal:** `SEC_USER_AGENT="Nombre email" python src/live_syy.py --holdings data/live/holdings.csv`. Genera `results/live/syy_score_<fecha>.csv` y `syy_orders_<fecha>.md` con los 10 cortos y 10 suplentes, la versión con límite sectorial, los 10 largos alternativos y las órdenes de la semana.
+
 **Pendiente para operar:** (1) fundamentales actuales para calcular M hoy (los datos de CPZ acaban en 2016); (2) confirmar la disponibilidad para cortar de cada valor (columna "Available to sell short"); (3) el coste exacto del swap del CFD SP500, que va en modo puntos y no se puede convertir a % sin el valor del punto.
 
 ---

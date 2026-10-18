@@ -3,3 +3,4 @@ data/*.parquet
 results/panels/
 results/returns/
 __pycache__/
+data/sec/
