@@ -26,7 +26,8 @@ import data
 from cpz_mispricing import factors
 from repo_xbrl import OUT as FRAMES, universe
 
-OUT = data.ROOT / "results" / "recent"
+SOURCE = sys.argv[1] if len(sys.argv) > 1 else "frames"          # frames | companyfacts
+OUT = data.ROOT / "results" / "recent" / SOURCE
 OUT.mkdir(parents=True, exist_ok=True)
 SIGN = {"NI": 1, "AC": 1, "NOA": 1, "r12_2": -1, "PROF": -1, "AG": 1, "ROA": -1, "DPI2A": 1}
 COMM = 0.000127
@@ -43,8 +44,52 @@ def first(df, cols):
     return out
 
 
+CF_COLS = {"assets": "assets", "liabilities": "liabilities",
+           "liab_equity": "liabilitiesandstockholdersequity", "equity": "stockholdersequity",
+           "cash": "cashandcashequivalentsatcarryingvalue", "st_invest": "shortterminvestments",
+           "lt_debt": "longtermdebtnoncurrent", "st_debt": "debtcurrent",
+           "ppe": "propertyplantandequipmentnet", "inventory": "inventorynet",
+           "net_income": "netincomeloss", "cfo": "netcashprovidedbyusedinoperatingactivities",
+           "gross_profit": "grossprofit", "revenue": "revenues", "cogs": "costofrevenue",
+           "shares": "weightedaveragenumberofdilutedsharesoutstanding"}
+CF_PANELS = {"instant": (None, ["assets", "liabilities", "liab_equity", "equity", "cash", "st_invest",
+                                "lt_debt", "st_debt", "ppe", "inventory"]),
+             "quarterly": ((80, 100), ["net_income"]), "shares": ((80, 100), ["shares"]),
+             "annual": ((350, 380), ["net_income", "cfo", "gross_profit", "revenue", "cogs"])}
+_CF = {}
+
+
+def load_cf(name):
+    """Same schema as the Frames panels, from SEC companyfacts keeping each period's ORIGINAL
+    as-filed value dated by its own filing (live_syy.download cache, data/sec/facts)."""
+    if "facts" not in _CF:
+        from live_syy import SEC
+        uni = universe()
+        parts = []
+        for tic, cik in zip(uni.symbol, uni.cik):
+            f = SEC / "facts" / f"{tic}.parquet"
+            if f.exists():
+                parts.append(pd.read_parquet(f).assign(cik=cik))
+        x = pd.concat(parts)
+        x["end"] = pd.to_datetime(x.end)
+        x["start"] = pd.to_datetime(x.start)
+        x["filed"] = pd.to_datetime(x.filed)
+        x["days"] = (x.end - x.start).dt.days
+        x = x.sort_values(["filed", "prio"]).drop_duplicates(["cik", "key", "start", "end"], keep="first")
+        _CF["facts"] = x
+    x = _CF["facts"]
+    span, keys = CF_PANELS[name]
+    x = x[x.key.isin(keys)]
+    x = x[x.start.isna()] if span is None else x[(x.days >= span[0]) & (x.days <= span[1])]
+    x = x.sort_values(["prio", "filed"]).drop_duplicates(["cik", "key", "end"], keep="first")
+    wide = x.pivot_table(index=["cik", "end"], columns="key", values="val", aggfunc="first")
+    ann = x.groupby(["cik", "end"]).filed.max()
+    wide = wide.rename(columns=CF_COLS).join(ann.rename("announcement_date")).reset_index()
+    return wide.rename(columns={"end": "fiscal_quarter_end"})
+
+
 def load(name, base=FRAMES):
-    df = pd.read_parquet(base / f"{name}.parquet")
+    df = load_cf(name) if base == "companyfacts" else pd.read_parquet(base / f"{name}.parquet")
     df["end"] = pd.to_datetime(df.fiscal_quarter_end)
     df["ann"] = pd.to_datetime(df.announcement_date)
     df["q"] = (df.end - pd.Timedelta(days=45)).dt.to_period("Q")
@@ -70,12 +115,12 @@ def feature_tables(base=FRAMES):
         + first(ins, ["debtcurrent", "longtermdebtcurrent", "shorttermborrowings"]).fillna(0)
     ins["ppe"] = first(ins, ["propertyplantandequipmentnet"])
     ins["inv"] = first(ins, ["inventorynet"])
-    base = ins[["cik", "q", "ann", "A", "L", "cash", "debt", "ppe", "inv"]]
-    t_ins = lagged(base, ["A", "ppe", "inv"], 4, "_1")
+    bs = ins[["cik", "q", "ann", "A", "L", "cash", "debt", "ppe", "inv"]]
+    t_ins = lagged(bs, ["A", "ppe", "inv"], 4, "_1")
     t_ins["AG"] = t_ins.A / t_ins.A_1 - 1
     t_ins["NOA"] = ((t_ins.A - t_ins.cash) - (t_ins.L - t_ins.debt)) / t_ins.A_1
     t_ins["DPI2A"] = ((t_ins.ppe - t_ins.ppe_1) + (t_ins.inv - t_ins.inv_1).fillna(0)) / t_ins.A_1
-    assets = base[["cik", "q", "A"]]
+    assets = bs[["cik", "q", "A"]]
 
     qn = load("quarterly", base)
     qn["ni"] = first(qn, ["netincomeloss", "profitloss"])
@@ -123,7 +168,7 @@ def stats(r, ppy=12):
 
 
 def main():
-    uni = universe().set_index("cik")
+    uni = universe().drop_duplicates("cik").set_index("cik")
     sym = uni.symbol
     half_spread = (uni.set_index("symbol").avg_spread_bps / 2 / 1e4)
     sector = uni.set_index("symbol").sector
@@ -132,10 +177,10 @@ def main():
     fwd = me.shift(-1) / me - 1
     mom = me.shift(1) / me.shift(12) - 1
     spy = fwd.pop("SPY")
-    tables = feature_tables()
+    tables = feature_tables(FRAMES if SOURCE == "frames" else "companyfacts")
 
     months = me.index[(me.index >= "2012-01-31") & (me.index <= me.index[-2])]
-    rows, books = [], {}
+    rows, books, panel = [], {}, []
     prev = {}
     for t in months:
         f = asof(tables, t)
@@ -148,6 +193,7 @@ def main():
         f["M"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= 5)
         f = f.dropna(subset=["M"])
         f["sector"] = sector.reindex(f.index)
+        panel.append(f.assign(date=t))
         rk = f.M.rank(ascending=False, method="first")
         q = np.ceil(f.M.rank(pct=True) * 5)
         ic = f.M.rank().corr(f.fwd.rank())
@@ -179,6 +225,19 @@ def main():
         books[t] = sets
     r = pd.DataFrame(rows).set_index("date")
     r.to_csv(OUT / "monthly.csv", float_format="%.5f")
+    pan = pd.concat(panel)
+    pan.to_parquet(OUT / "panel.parquet")
+    ics = []
+    for k, sgn in list(SIGN.items()) + [("M", 1)]:
+        ic = pan.groupby("date").apply(lambda g: (g[k] * (sgn if k != "M" else 1)).rank().corr(g.fwd.rank()))
+        q = pan.groupby("date").apply(lambda g: g.fwd[(g[k] * (sgn if k != "M" else 1)).rank(pct=True) > 0.8].mean()
+                                      - g.fwd.mean())
+        ics.append({"anomalia": k, "IC_medio": ic.mean(), "t_IC": ic.mean() / ic.std() * np.sqrt(ic.count()),
+                    "Q5_menos_EW_%mes": 100 * q.mean(), "t_Q5": q.mean() / q.std() * np.sqrt(q.count()),
+                    "Q5_2022_2026_%mes": 100 * q.loc["2022":].mean(), "cobertura": pan[k].notna().mean()})
+    ics = pd.DataFrame(ics)
+    ics.to_csv(OUT / "anomalias.csv", index=False, float_format="%.4f")
+    print(ics.round(3).to_string(index=False))
 
     def cost(k):   # sell + buy of replaced names, both sides, at measured spreads + commission
         return 2 * r[f"to_{k}"] * (r[f"spr_{k}"] + COMM)

@@ -379,7 +379,38 @@ Probé sobre CPZ (Top 500, 10 posiciones) una regla con banda: se entra al llega
 
 ---
 
-## 12. Limitaciones y siguientes pasos
+## 12. Backtest reciente 2012-2026 con datos de la SEC (`src/recent_backtest.py`)
+
+**Datos (librerías del repo ML4T).** Fundamentales con el descargador XBRL del repo (`repo_xbrl.py` sobre `xbrl_download.py`: API Frames y API Submissions) y precios ajustados con el proveedor Yahoo de `ml4t-data` (`repo_prices.py`). Universo: las 420 acciones del S&P 500 **actual** disponibles en Darwinex, rebalanceo mensual de 2012-01 a 2026-09.
+
+**Problema de fechado con Frames.** Frames devuelve el último valor publicado para cada periodo, normalmente un comparativo del informe del año siguiente. Por eso el repo fecha cada dato por su última presentación: mediana de **400 días** después del cierre en balance y **780 días** en datos anuales. Así no hay mirada al futuro, pero en un backtest equivale a usar fundamentales con 1-2 años de antigüedad y deja solo ~144 acciones por mes con puntuación. Para el backtest uso además **companyfacts con el valor original y su fecha real de presentación** (retraso mediano de 35-54 días, como en la realidad). En el uso semanal en vivo, Frames sí es puntual: el último trimestre aún no tiene comparativos posteriores.
+
+**Resultados (companyfacts, point-in-time):**
+
+| Estrategia | 2012-2026 %/mes | t | Sharpe | Drawdown máx. | 2012-16 | 2017-21 | 2022-26 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Quintil sobrevalorado vs mercado EW (bruto) | +0,08 | 0,9 | 0,22 | −10 % | −0,04 | +0,04 | +0,25 |
+| 10 cortos / SPY, neto Zero | −0,05 | −0,2 | −0,04 | −47 % | +0,05 | −0,44 | +0,25 |
+| 10 cortos (máx. 3 por sector) / SPY, neto Zero | −0,12 | −0,4 | −0,09 | −50 % | +0,03 | −0,47 | +0,10 |
+| 10 cortos / 10 largos infravalorados, neto Zero | +0,29 | 0,8 | 0,19 | −44 % | +0,43 | +0,10 | +0,33 |
+| 10 cortos (máx. 3 por sector) / SPY, neto Classic | −0,41 | −1,4 | −0,32 | −69 % | −0,26 | −0,76 | −0,19 |
+| Referencia: 10 perdedores de momentum / SPY (bruto) | −0,91 | −1,8 | −0,42 | −91 % | −1,02 | −1,59 | −0,09 |
+
+IC medio de M (correlación de rangos con el retorno del mes siguiente): −0,009 (t = −1,35).
+
+![Backtest reciente](figures/fig11_backtest_reciente_2012_2026.png)
+
+**Por anomalía** (quintil "sobrevalorado" menos mercado; un valor negativo es lo que buscan los cortos): solo **NOA** funciona en la dirección esperada (−0,12 %/mes; IC t = −2,5). **Crecimiento de activos (+0,34, t = 2,6), emisión de acciones (+0,24, t = 2,2) y ROA (+0,29, t = 1,8) funcionaron al revés**: las empresas "sobrevaloradas" por estos criterios lo hicieron mejor que el mercado. Accruals, inversión, rentabilidad bruta y momentum quedan cerca de cero.
+
+**Lectura.**
+1. **Con este universo, en 2012-2026 la estrategia no funciona:** el corto concentrado cubierto con SPY queda en ~0 neto, y en Classic pierde por los swaps.
+2. **Hay un sesgo de supervivencia fuerte y en contra de los cortos.** El universo son las empresas que **hoy** están en el S&P 500, es decir, las que crecieron (muchas emitiendo acciones y aumentando activos) y no quebraron. Por eso las anomalías de crecimiento salen invertidas y el corto de perdedores pierde −0,9 %/mes. Con la muestra point-in-time de CPZ, en 2011-2016 la puntuación seguía funcionando en el Top 500 (+0,47 %/mes, t = 1,9). En el mismo periodo, este backtest da ~0 con las empresas supervivientes.
+3. **También hay razones reales para esperar menos:** decaimiento de las anomalías tras su publicación (McLean y Pontiff), anomalías más débiles en grandes empresas fáciles de cortar, y la ausencia de las 3 anomalías más ligadas a dificultades financieras.
+4. **Conclusión:** no hay evidencia reciente suficiente para operar con dinero real. Hace falta repetir el backtest con la **composición histórica del S&P 500** (incluidas las empresas que salieron del índice) para separar el sesgo del verdadero decaimiento. Mientras tanto, **Darwinex Zero** (capital virtual) es un buen sitio para probar en real sin arriesgar capital.
+
+---
+
+## 13. Limitaciones y siguientes pasos
 
 * **Muestra sin sesgo y larga**: ejecutar `data/equities/market/us_equities/download.py` del repo ML4T con una API key gratuita de NASDAQ Data Link (WIKI 1962-2018) y añadir clasificación SIC/GICS histórica.
 * **Industrias más finas** (GICS sub-industry históricas o las 49 industrias de Fama-French) para el momentum de industria.
@@ -405,6 +436,9 @@ python make_figures.py && python make_tables.py
 # Puntuación SYY sobre Chen-Pelger-Zhu: descargar datasets.zip (carpeta Google Drive del repo
 # jasonzy121/Deep_Learning_Asset_Pricing), descomprimir datasets/char/*.npz en external/cpz/datasets/char
 python cpz_build.py && python cpz_mispricing.py && python cpz_figures.py
+# Backtest reciente con las librerías del repo (SEC Frames + ml4t-data) y con companyfacts
+python repo_xbrl.py && python repo_prices.py
+python recent_backtest.py frames && python recent_backtest.py companyfacts
 ```
 
 ### Referencias
