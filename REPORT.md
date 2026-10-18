@@ -16,7 +16,8 @@ la parrilla completa en `results/grid_stats.csv`) y gráficos en `figures/`.
 | Pregunta | Respuesta corta |
 |---|---|
 | ¿FIP es mejor que cortar las caídas **bruscas**? | **Sí, frente a las caídas por salto** (la mayor caída de 1 día: FIP gana +2 a +6,5 pp/año brutos en las 16 combinaciones de ventana×muestra, t de hasta 3,1) **y frente a la mayor caída reciente** a horizonte semanal o de 1 mes (+2,6 a +11,6 pp/año en semanal, t de hasta 3,7). Los valores que se desploman de golpe **rebotan** y son el peor corto posible. |
-| ¿FIP es mejor que el momentum corto clásico o que los perdedores de ID alto? | **No.** Frente al quintil perdedor (MOM) o los perdedores "discretos" de ID alto (DISC), la diferencia es pequeña, de signo variable y casi nunca significativa. En grandes valores del S&P 500 el efecto FIP *dentro* de los perdedores no aparece. |
+| ¿FIP es mejor que el momentum corto clásico o que los perdedores de ID alto? | **Sin evidencia en mis datos, pero el paper sí lo muestra.** En mis muestras la diferencia frente a MOM o DISC es pequeña, de signo variable y casi nunca significativa. Sin embargo, mi muestra sin sesgo (AlgoSeek) solo cubre 5 años y no tiene potencia para detectar el efecto. Da, Gurun y Warachka (2014), con CRSP 1927-2007 sin sesgo, encuentran que los perdedores de caída continua rinden ~6 pp menos en 6 meses que los de caída brusca, también en grandes empresas aunque con menos fuerza (§4). |
+| ¿Qué perdedores conviene cortar? (Chen-Pelger-Zhu, CRSP 1967-2016, **sin sesgo**) | **Los perdedores que además están sobrevalorados** según la puntuación de Stambaugh, Yu y Yuan. En empresas grandes, el corto cubierto con mercado rinde 0,71 %/mes (t=4,9) y los perdedores **no** sobrevalorados, 0,00 %/mes. La propia puntuación SYY (quintil más sobrevalorado) rinde 0,44 %/mes (t=6,0, Sharpe 0,88), y combinada con alta volatilidad idiosincrática, 0,77 %/mes. Funciona sobre todo tras sentimiento inversor alto y sigue funcionando en 2011-2016, después de la muestra del paper (§10). |
 | ¿Gana dinero el corto de momentum en sí? | **No, después de costes**, en ninguna de las dos muestras: Sharpe neto entre −0,3 y −0,9 cubriendo con el mercado. Parte es sesgo de supervivencia en la muestra larga, pero también pierde en la muestra *point-in-time* 2017-2021. |
 | ¿Semanal o mensual? | **Mensual.** En semanal la rotación (36-85 % por semana) cuesta 5-10 pp/año y la reversión a 1 semana castiga a los cortos. |
 | Sector como **señal** | El doble filtro (FIP dentro de sector perdedor) **mejora** el FIP mensual: Sharpe −0,28 → +0,06 en Yahoo 1 m, y +0,19 si el sector también cae de forma gradual (ID sectorial bajo). Pero lo hace con la mitad de nombres y más volatilidad, y el momentum sectorial puro (11 sectores GICS) **no** funciona solo. |
@@ -118,6 +119,14 @@ natural (§10).
 2. **La mayor caída reciente revierte a corto plazo.** El decil que más cayó la última semana o el último mes (CRASH) es especialmente malo a horizonte semanal, por la reversión de corto plazo de Lehmann y Jegadeesh. Con ventanas largas (3-12 meses) la diferencia desaparece.
 3. **El efecto FIP de DGW (FIP mejor que DISC dentro de los perdedores) no aparece** en grandes valores del S&P 500. Lo esperable: DGW lo documentan en el universo CRSP completo, y en *large caps* con alta cobertura de analistas la atención limitada pesa menos.
 4. **FIP concentra más riesgo de crash**: β MOM 0,79 frente a 0,42 de DISC, y −37 % en abril de 2009. La caída continua es justo lo que más rebota cuando el mercado gira (los "perdedores de alta beta").
+
+**Contraste con el paper original.** Da, Gurun y Warachka (2014, RFS, tabla 2, CRSP 1927-2007 sin sesgo, quintiles de PRET 12-1 × quintiles de ID, mantenimiento 6 meses):
+
+* Los perdedores de caída continua rinden **3,62 %** en 6 meses y los de caída brusca, **9,60 %**.
+* Los ganadores apenas cambian con el ID. El efecto FIP está sobre todo **en el lado corto**.
+* En empresas grandes (top 30 %, desde 1980) los perdedores pasan de 6,41 % (brusco) a 3,45 % (continuo). El spread de momentum continuo − discreto es de 4,92 % (t=3,11).
+
+Mis muestras no reproducen la ventaja de FIP frente a DISC, y hay varias razones: AlgoSeek solo cubre 5 años, Yahoo tiene sesgo de supervivencia, uso terciles en vez de quintiles, mantengo 1 mes en vez de 6, y el periodo incluye el crash de 2009.
 
 ![Acumulado 12-1m](figures/fig2_acumulado_yahoo_12-1m.png)
 
@@ -239,7 +248,63 @@ Los perdedores de la muestra "actual" rinden **3-8 pp/año más**: son los que s
 5. **Cobertura**: preferir la cesta del sector, o largos elegidos por el modelo, frente a "las más fuertes por momentum". Si solo hay acciones, limitar la β al factor MOM del libro.
 6. **Gestión de riesgo**: objetivo de volatilidad con la vol realizada y vigilancia de los crashes de momentum (rallies tras mercados bajistas: 2009, noviembre de 2020, enero de 2023).
 
-## 10. Limitaciones y siguientes pasos
+## 10. Puntuación de sobrevaloración de Stambaugh, Yu y Yuan con datos sin sesgo (Chen-Pelger-Zhu)
+
+**Datos.** Panel de Chen, Pelger y Zhu (2020), el dataset `firm_characteristics` del repo ML4T. Procede de CRSP y Compustat, **incluye empresas excluidas de bolsa** y cubre 1967-2016: 1,22 M acciones-mes, entre 430 y 2.800 acciones por mes (mediana 2.200). Cada fila contiene características del mes anterior (rangos transversales en [−0,5; 0,5]) y el **retorno en exceso** del mes, así que no hay mirada al futuro. Lo verifiqué: ST_REV de la fila t es el rango del retorno de la fila t−1, y la fila de octubre de 1987 tiene un retorno medio de −29,7 %. Los identificadores son anónimos, no hay sector y la frecuencia es mensual, así que **no se puede calcular el ID diario de FIP**. Por eso esta parte es complementaria.
+
+**Construcción** (`src/cpz_mispricing.py`). De las 11 anomalías de SYY (2015) están disponibles 8: emisión neta de acciones (NI), accruals (AC), activos operativos netos (NOA), momentum (r12_2), rentabilidad bruta (PROF), crecimiento de activos (Investment), ROA e inversión sobre activos (DPI2A). Faltan dificultades financieras (CHS), O-score y emisión compuesta. Cada una se orienta para que un percentil alto signifique sobrevaloración, y **M = media de los 8 percentiles**. El corto es el quintil más alto de M, en carteras equiponderadas. Universos: todas las acciones, grandes (top 30 % por capitalización, LME) y mega (top 10 %, cercano al S&P 500).
+
+Las 8 anomalías apuntan en la dirección esperada, salvo ROA, que en ponderación igual no da alfa en la muestra completa (con FF3 sí en 1967-1986). M combinada: L/S 1,03 %/mes (t=8,4), alfa FF3 1,11 %/mes (t=9,6), frente a 1,48 %/mes con deciles ponderados por capitalización en el paper.
+
+![Cortos SYY](figures/fig7_cpz_cortos_syy.png)
+
+**Corto cubierto con el mercado EW, 1967-2016 (grandes, top 30 %):**
+
+| Corto | %/mes | t | Alfa FF3 | Alfa FF6 (con MOM) | Sharpe bruto | Crashes MOM (10 peores meses) |
+|---|---:|---:|---:|---:|---:|---:|
+| Perdedores de momentum (Q1 r12_2) | 0,34 | 3,0 | 0,50 | −0,03 | 0,41 | −9,0 % |
+| Perdedores **no** sobrevalorados (M ≤ Q3) | 0,00 | 0,0 | 0,15 | −0,30 | 0,01 | −9,2 % |
+| **Perdedores Y sobrevalorados (Q5 M)** | **0,71** | 4,9 | 0,89 | 0,30 (t 3,0) | 0,69 | −8,9 % |
+| SYY M: Q5 sobrevaloradas | 0,44 | 6,0 | 0,50 | 0,29 (t 4,6) | **0,88** | **−2,3 %** |
+| SYY M sin momentum: Q5 | 0,35 | 5,0 | 0,36 | 0,27 (t 4,3) | 0,77 | **−0,3 %** |
+| **Sobrevaloradas + alta IVOL** | **0,77** | 4,8 | 0,87 | **0,45 (t 3,5)** | 0,66 | −5,8 % |
+
+En **mega empresas** (top 10 %) el patrón se mantiene con menos fuerza: M Q5 0,37 %/mes (t=4,6, Sharpe 0,66) y sobrevaloradas + alta IVOL 0,66 %/mes (t=3,8).
+
+![Acumulado](figures/fig10_cpz_acumulado_grandes.png)
+
+**Lectura:**
+1. **Todo el valor del corto de momentum está en los perdedores sobrevalorados.** Los perdedores que el resto de anomalías no considera sobrevalorados no rinden nada como corto y caen igual en los crashes. Es justo lo que predicen SYY: la parte de la anomalía que funciona en corto es la sobrevaloración que el arbitraje no puede corregir.
+2. **La puntuación M sin momentum es el corto más estable**: Sharpe 0,77 y casi nada de pérdida en los crashes de momentum (−0,3 %). Es un buen complemento diversificador del corto FIP.
+3. **Volatilidad idiosincrática** (tabla 5×5 como en SYY 2015): en el quintil más sobrevalorado, el alfa FF3 va de −0,12 % (IVOL baja) a **−0,86 %/mes (IVOL alta, t=−5,3)** en grandes empresas. La diferencia IVOL alta − baja es −0,74 %/mes (t=−3,8). En el quintil infravalorado no hay efecto. Es la asimetría del arbitraje: cortar es caro y arriesgado, sobre todo con alta volatilidad, así que la sobrevaloración persiste.
+
+![Mispricing x IVOL](figures/fig8_cpz_mispricing_x_ivol.png)
+
+4. **Sentimiento (Baker-Wurgler ortogonalizado, mes anterior por encima o por debajo de la mediana):**
+
+| Grandes, corto cubierto con mercado | Tras sentimiento ALTO | Tras sentimiento BAJO | Diferencia (t) |
+|---|---:|---:|---:|
+| Perdedores de momentum | 0,36 | 0,32 | 0,04 (0,2) |
+| SYY M: Q5 | 0,61 | 0,27 | **0,34 (2,5)** |
+| Perdedores Y sobrevalorados | 0,90 | 0,53 | 0,38 (1,3) |
+| Sobrevaloradas + alta IVOL | **1,21** | 0,32 | **0,88 (2,9)** |
+
+Se reproduce el resultado de SYY (2012): **los cortos de sobrevaloración rinden sobre todo tras sentimiento alto**. El momentum puro, en cambio, no depende del sentimiento.
+
+![Sentimiento](figures/fig9_cpz_sentimiento.png)
+
+5. **Fuera de la muestra del paper (2011-2016, grandes):** M Q5 0,52 %/mes (t=2,4), M sin momentum 0,48 (t=2,4), perdedores y sobrevalorados 0,80 (t=1,8), perdedores de momentum 0,29 (t=1,1) y perdedores no sobrevalorados −0,22. Solo son 6 años, pero el patrón se mantiene.
+6. **Costes.** La rotación mensual es del 13 % para M Q5 y del 27-56 % para los cortos con momentum o IVOL. Con 10 pb por operación, el Sharpe neto aproximado de M Q5 en grandes empresas pasa de 0,88 a 0,83. No incluye el coste de préstamo, que en acciones sobrevaloradas con alta IVOL puede ser alto (Drechsler y Drechsler, 2014).
+
+**Implicaciones para la estrategia corta:**
+* **Filtrar el corto FIP o de momentum por la puntuación M**: cortar solo perdedores que además estén en el quintil sobrevalorado. Duplica el retorno del corto y deja un alfa FF6 positivo, que el momentum solo no tiene.
+* Añadir un **sleeve M sin momentum**: corto estable, con poca exposición a los crashes de momentum.
+* **Escalar el tamaño de los cortos con el sentimiento** (índice Baker-Wurgler o un proxy actual) y priorizar los nombres sobrevalorados con alta volatilidad idiosincrática, vigilando el coste de préstamo.
+* Para aplicarlo hoy al S&P 500 hacen falta fundamentales trimestrales (Compustat o SEC XBRL) para calcular las 8-11 anomalías en tiempo real. Los datos de CPZ terminan en 2016.
+
+---
+
+## 11. Limitaciones y siguientes pasos
 
 * **Muestra sin sesgo y larga**: ejecutar `data/equities/market/us_equities/download.py` del repo ML4T con una API key gratuita de NASDAQ Data Link (WIKI 1962-2018) y añadir clasificación SIC/GICS histórica.
 * **Industrias más finas** (GICS sub-industry históricas o las 49 industrias de Fama-French) para el momentum de industria.
@@ -262,9 +327,15 @@ python run_tests.py      # tests FIP − rival y sesgo de supervivencia
 python run_diffusion.py  # Fama-MacBeth líder→rezagado y cliente→proveedor
 python run_combo.py      # sleeves y meta-modelo walk-forward
 python make_figures.py && python make_tables.py
+# Puntuación SYY sobre Chen-Pelger-Zhu: descargar datasets.zip (carpeta Google Drive del repo
+# jasonzy121/Deep_Learning_Asset_Pricing), descomprimir datasets/char/*.npz en external/cpz/datasets/char
+python cpz_build.py && python cpz_mispricing.py && python cpz_figures.py
 ```
 
 ### Referencias
 Da, Gurun y Warachka (2014), *Frog in the Pan*, RFS · Moskowitz y Grinblatt (1999), JF · Hou
 (2007), RFS · Cohen y Frazzini (2008), JF · Blitz, Huij y Martens (2011), JEF · Daniel y Moskowitz
-(2016), *Momentum Crashes*, JFE · Jansen, *Machine Learning for Trading* (repo de datos y librerías).
+(2016), *Momentum Crashes*, JFE · Stambaugh, Yu y Yuan (2012), *The Short of It*, JFE · Stambaugh,
+Yu y Yuan (2015), *Arbitrage Asymmetry and the Idiosyncratic Volatility Puzzle*, JF · Chen, Pelger y
+Zhu (2020), *Deep Learning in Asset Pricing* (datos) · Baker y Wurgler (2006), JF (índice de
+sentimiento) · Jansen, *Machine Learning for Trading* (repo de datos y librerías).
