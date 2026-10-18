@@ -337,7 +337,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--asof", default=str(date.today()))
     ap.add_argument("--holdings", default=str(data.DATA / "live" / "holdings.csv"))
-    ap.add_argument("--capital", type=float, default=1900.0, help="account equity in EUR")
+    ap.add_argument("--capital", type=float, default=1900.0, help="account equity")
+    ap.add_argument("--currency", choices=["EUR", "USD"], default="EUR")
     ap.add_argument("--gross", type=float, default=1.0, help="short notional / equity (same for the SPY long)")
     ap.add_argument("--max-changes", type=int, default=3)
     args = ap.parse_args()
@@ -348,6 +349,7 @@ def main():
     dx = pd.read_csv(data.DATA / "darwinex" / "spread_history.csv")
     st = dx[(dx.swap_mode == 5) & (dx.contract_size == 1)].set_index("symbol")
     eurusd = dx.set_index("symbol").last_price.get("EURUSD", 1.1)
+    cap_usd = args.capital * (eurusd if args.currency == "EUR" else 1.0)
     sp = current_members()
     sp["mt5"] = sp.symbol.str.replace(".", "", regex=False)
     uni = sp[sp.mt5.isin(st.index)].copy()
@@ -385,7 +387,7 @@ def main():
     cand = sector_capped(df, 30)
     flags = mna_flags(cand.cik, (asof - timedelta(days=180)).date().isoformat())
     cand = cand.assign(fusiones_SEC=cand.cik.map(flags))
-    target = args.capital * eurusd * args.gross / N_SHORT
+    target = cap_usd * args.gross / N_SHORT
     cand["acciones"] = (target / cand.precio).round().clip(lower=1).astype(int)
     cand["nocional_usd"] = cand.acciones * cand.precio
     ok = (cand.precio <= 1.5 * target) & (cand.fusiones_SEC == "")
@@ -409,7 +411,7 @@ def main():
             "avg_spread_bps", "ultimo_informe", "fusiones_SEC"]
     with open(LIVE / f"syy_orders_{stamp}.md", "w") as fh:
         fh.write(f"# Órdenes SYY semana del {stamp} — Darwinex Zero\n\n")
-        fh.write(f"Capital {args.capital:,.0f} € (×{eurusd:.4f} = {args.capital * eurusd:,.0f} USD), "
+        fh.write(f"Capital {args.capital:,.0f} {args.currency} (= {cap_usd:,.0f} USD), "
                  f"corto bruto {args.gross:.1f}× ⇒ objetivo {target:,.0f} USD por valor. Precios de cierre "
                  f"{px.index[-1].date()}; momentum hasta {me.index[-2].date()}.\n\n")
         fh.write(f"Universo: {len(df)} valores del S&P 500 disponibles en Darwinex, "
