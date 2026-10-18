@@ -323,7 +323,36 @@ Se reproduce el resultado de SYY (2012): **los cortos de sobrevaloración rinden
 
 ---
 
-## 11. Limitaciones y siguientes pasos
+## 11. Ejecución en Darwinex Classic (CFD, cuenta de 1.900 €)
+
+**Costes reales medidos en MT5** (`tools/SpreadHistory.mq5`, ticks del 8 al 16 de octubre de 2026, `data/darwinex/spread_history.csv`):
+
+* **Swaps de los CFD de acciones y ETF** (modo interés anual sobre el precio, /360 por día, triple el viernes): largo **−5,50 %/año** y corto **+2,10 %/año**. Un libro con la misma exposición larga que corta paga en neto **−3,4 %/año ≈ −0,29 %/mes**.
+* **Spread en las 420 acciones del S&P 500 disponibles** (de 503): mediana de **16 pb completos** (8 pb a cada lado), percentil 75 de 23 pb y percentil 90 de 30 pb. Energía, utilities y consumo básico rondan 7-9 pb; salud, inmobiliario y materiales, 19-20 pb. Los **ETF y el índice** son mucho más baratos: SPY 0,5 pb, QQQ 0,5 pb, SP500 0,8 pb.
+* **Comisión:** 0,02 USD por acción y orden (~1,3 pb al precio mediano de 157 $). **Retención** del 15 % en dividendos de posiciones largas. **Margen** del 20 %, con stop-out al 50 % de nivel de margen.
+
+**Backtest neto** (`src/darwinex_sim.py`, Top 500 de CPZ, 1967-2016, rebalanceo mensual). Cada mes se cortan las N más sobrevaloradas según M; la cobertura es el mercado EW (proxy de SPY o del CFD SP500) o las N más infravaloradas. Escenario con 8 pb a cada lado, y entre paréntesis con 12 pb:
+
+| N = 10 por lado | %/mes neto | t | Sharpe | Drawdown máx. | Desde 2000, %/mes |
+|---|---:|---:|---:|---:|---:|
+| **SYY M: corto sobrevaloradas / largo infravaloradas** | **1,09 (1,06)** | 4,6 | **0,65 (0,63)** | −53 % | 0,68 |
+| **SYY M: corto sobrevaloradas / largo SPY** | **0,67 (0,65)** | 3,7 | 0,53 (0,51) | **−36 %** | 0,69 |
+| Perdedores y sobrevalorados / largo infravaloradas | 1,11 (1,07) | 4,0 | 0,59 | −80 % | 0,57 |
+| Sobrevaloradas + alta IVOL / largo infravaloradas | 0,91 (0,85) | 3,3 | 0,45 | −82 % | 0,51 |
+| SYY M, solo corto | 0,18 (0,16) | 0,6 | 0,08 | −82 % | 0,22 |
+
+Los spreads reales (más anchos de lo supuesto) se compensan en parte con unos swaps algo menores que los redondeados de la web. **La recomendación es la puntuación SYY con 10 posiciones por lado.** Para minimizar el drawdown, corto en las 10 más sobrevaloradas y largo en SPY o en el CFD SP500. Para maximizar retorno y Sharpe, largo en las 10 más infravaloradas. Las variantes con momentum o alta IVOL concentradas en 10 valores tienen drawdowns inaceptables (−80 %). Ponerse solo corto no compensa.
+
+**Dimensionado (1.900 € ≈ 2.150 $):**
+* Con 1× por lado: ~215 $ por acción corta y un largo de 3 SPY (~2.290 $) o 0,03 lotes del CFD SP500. Margen usado ≈ 20 % × 4.400 $ ≈ 880 $, con un nivel de margen del ~245 %.
+* No pasar de 1,5× por lado: el peor mes histórico es del −15 % al −22 %, y el drawdown, del −36 % al −53 %.
+* Mínimo 1 acción: 98 de las 420 acciones cotizan por encima de 300 $. Entre las candidatas, priorizar precios bajos o asumir pesos desiguales.
+
+**Pendiente para operar:** (1) fundamentales actuales para calcular M hoy (los datos de CPZ acaban en 2016); (2) confirmar la disponibilidad para cortar de cada valor (columna "Available to sell short"); (3) el coste exacto del swap del CFD SP500, que va en modo puntos y no se puede convertir a % sin el valor del punto.
+
+---
+
+## 12. Limitaciones y siguientes pasos
 
 * **Muestra sin sesgo y larga**: ejecutar `data/equities/market/us_equities/download.py` del repo ML4T con una API key gratuita de NASDAQ Data Link (WIKI 1962-2018) y añadir clasificación SIC/GICS histórica.
 * **Industrias más finas** (GICS sub-industry históricas o las 49 industrias de Fama-French) para el momentum de industria.

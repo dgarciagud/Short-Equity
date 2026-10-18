@@ -22,10 +22,15 @@ from cpz_mispricing import bins, factors, load, size_filter, tstat
 
 OUT = data.ROOT / "results" / "cpz"
 DAYS_PER_MONTH = 365.25 / 12
-SWAP_LONG = -0.0002 * DAYS_PER_MONTH    # -0.61 %/month
-SWAP_SHORT = 0.0001 * DAYS_PER_MONTH    # +0.30 %/month
-SPREAD = 0.0005                         # 5 bp half-spread per side (assumption)
-COMM = 0.0001                           # 0.02 USD/share on a ~200 USD share
+# MT5 swap_mode 5 (annual interest on current price, /360 per day): long -5.50 %, short +2.10 %
+SWAP_LONG = -0.055 / 360 * DAYS_PER_MONTH    # -0.465 %/month
+SWAP_SHORT = 0.021 / 360 * DAYS_PER_MONTH    # +0.178 %/month
+# short-only books: the credit is (T-bill - markup); markup assumed 1.7 %/yr (T-bill ~3.8 %)
+SHORT_MARKUP = 0.017 / 12
+# measured in MT5 (spread_history.csv, 8-16 Oct 2026, 420 S&P 500 stock CFDs):
+# median full spread 16 bp -> 8 bp per side; upper quartile 23 bp -> 12 bp per side
+SPREAD = float(__import__("os").environ.get("HALF_SPREAD_BP", 8)) / 1e4
+COMM = 0.000127                         # 0.02 USD/share on the median 157 USD price
 DIV_WHT = 0.15 * 0.025 / 12             # 15 % withholding on a ~2.5 % dividend yield, long leg only
 
 
@@ -74,12 +79,13 @@ def main():
                 b = book(d, mask, hedge, n)
                 if hedge == "sin cobertura":
                     gross = -b.r_short
-                    fin = SWAP_SHORT - rf.reindex(b.index).fillna(0)
+                    fin = pd.Series(-SHORT_MARKUP, index=b.index)
                     trade = 2 * cost_trade * b.to_s
                 else:
                     gross = b.r_long - b.r_short
                     fin = pd.Series(SWAP_SHORT + SWAP_LONG - DIV_WHT, index=b.index)
-                    trade = 2 * cost_trade * (b.to_s + b.to_l)
+                    to_l = b.to_l if hedge == "infravaloradas" else 0.0
+                    trade = 2 * cost_trade * (b.to_s + to_l)
                 net = gross + fin - trade
                 for lab, s in (("bruto", gross), ("neto Darwinex", net)):
                     rows.append({"candidatas": name, "N por lado": n, "cobertura": hedge, "medida": lab,
@@ -91,7 +97,8 @@ def main():
                                  "post2000_%mes": 100 * s.loc["2000":].mean(),
                                  "rotacion_corto": b.to_s.mean(), "meses": len(s)})
     res = pd.DataFrame(rows)
-    res.to_csv(OUT / "darwinex_classic.csv", index=False, float_format="%.4f")
+    res["half_spread_bp"] = SPREAD * 1e4
+    res.to_csv(OUT / f"darwinex_classic_spread{round(SPREAD * 1e4)}.csv", index=False, float_format="%.4f")
     pd.set_option("display.width", 250)
     for v in ("media_%mes", "t", "sharpe", "vol_anual_%", "max_dd_%", "peor_mes_%", "post2000_%mes"):
         for lab in ("bruto", "neto Darwinex"):
