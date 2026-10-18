@@ -17,7 +17,7 @@ la parrilla completa en `results/grid_stats.csv`) y gráficos en `figures/`.
 |---|---|
 | ¿FIP es mejor que cortar las caídas **bruscas**? | **Sí, frente a las caídas por salto** (la mayor caída de 1 día: FIP gana +2 a +6,5 pp/año brutos en las 16 combinaciones de ventana×muestra, t de hasta 3,1) **y frente a la mayor caída reciente** a horizonte semanal o de 1 mes (+2,6 a +11,6 pp/año en semanal, t de hasta 3,7). Los valores que se desploman de golpe **rebotan** y son el peor corto posible. |
 | ¿FIP es mejor que el momentum corto clásico o que los perdedores de ID alto? | **Sin evidencia en mis datos, pero el paper sí lo muestra.** En mis muestras la diferencia frente a MOM o DISC es pequeña, de signo variable y casi nunca significativa. Sin embargo, mi muestra sin sesgo (AlgoSeek) solo cubre 5 años y no tiene potencia para detectar el efecto. Da, Gurun y Warachka (2014), con CRSP 1927-2007 sin sesgo, encuentran que los perdedores de caída continua rinden ~6 pp menos en 6 meses que los de caída brusca, también en grandes empresas aunque con menos fuerza (§4). |
-| ¿Qué perdedores conviene cortar? (Chen-Pelger-Zhu, CRSP 1967-2016, **sin sesgo**) | **Los perdedores que además están sobrevalorados** según la puntuación de Stambaugh, Yu y Yuan. En empresas grandes, el corto cubierto con mercado rinde 0,71 %/mes (t=4,9) y los perdedores **no** sobrevalorados, 0,00 %/mes. La propia puntuación SYY (quintil más sobrevalorado) rinde 0,44 %/mes (t=6,0, Sharpe 0,88), y combinada con alta volatilidad idiosincrática, 0,77 %/mes. Funciona sobre todo tras sentimiento inversor alto y sigue funcionando en 2011-2016, después de la muestra del paper (§10). |
+| ¿Qué perdedores conviene cortar? (Chen-Pelger-Zhu, CRSP 1967-2016, **sin sesgo**) | **Los perdedores que además están sobrevalorados** según la puntuación de Stambaugh, Yu y Yuan. En el Top 500 por capitalización (≈S&P 500), el corto cubierto con mercado rinde 0,69 %/mes (t=4,6) y los perdedores **no** sobrevalorados, 0,01 %/mes. La propia puntuación SYY (quintil más sobrevalorado) rinde 0,43 %/mes (t=5,8, Sharpe 0,84), y combinada con alta volatilidad idiosincrática, 0,69 %/mes. Funciona sobre todo tras sentimiento inversor alto y sigue funcionando en 2011-2016, después de la muestra del paper (§10). |
 | ¿Gana dinero el corto de momentum en sí? | **No, después de costes**, en ninguna de las dos muestras: Sharpe neto entre −0,3 y −0,9 cubriendo con el mercado. Parte es sesgo de supervivencia en la muestra larga, pero también pierde en la muestra *point-in-time* 2017-2021. |
 | ¿Semanal o mensual? | **Mensual.** En semanal la rotación (36-85 % por semana) cuesta 5-10 pp/año y la reversión a 1 semana castiga a los cortos. |
 | Sector como **señal** | El doble filtro (FIP dentro de sector perdedor) **mejora** el FIP mensual: Sharpe −0,28 → +0,06 en Yahoo 1 m, y +0,19 si el sector también cae de forma gradual (ID sectorial bajo). Pero lo hace con la mitad de nombres y más volatilidad, y el momentum sectorial puro (11 sectores GICS) **no** funciona solo. |
@@ -252,49 +252,68 @@ Los perdedores de la muestra "actual" rinden **3-8 pp/año más**: son los que s
 
 **Datos.** Panel de Chen, Pelger y Zhu (2020), el dataset `firm_characteristics` del repo ML4T. Procede de CRSP y Compustat, **incluye empresas excluidas de bolsa** y cubre 1967-2016: 1,22 M acciones-mes, entre 430 y 2.800 acciones por mes (mediana 2.200). Cada fila contiene características del mes anterior (rangos transversales en [−0,5; 0,5]) y el **retorno en exceso** del mes, así que no hay mirada al futuro. Lo verifiqué: ST_REV de la fila t es el rango del retorno de la fila t−1, y la fila de octubre de 1987 tiene un retorno medio de −29,7 %. Los identificadores son anónimos, no hay sector y la frecuencia es mensual, así que **no se puede calcular el ID diario de FIP**. Por eso esta parte es complementaria.
 
-**Construcción** (`src/cpz_mispricing.py`). De las 11 anomalías de SYY (2015) están disponibles 8: emisión neta de acciones (NI), accruals (AC), activos operativos netos (NOA), momentum (r12_2), rentabilidad bruta (PROF), crecimiento de activos (Investment), ROA e inversión sobre activos (DPI2A). Faltan dificultades financieras (CHS), O-score y emisión compuesta. Cada una se orienta para que un percentil alto signifique sobrevaloración, y **M = media de los 8 percentiles**. El corto es el quintil más alto de M, en carteras equiponderadas. Universos: todas las acciones, grandes (top 30 % por capitalización, LME) y mega (top 10 %, cercano al S&P 500).
+**Construcción** (`src/cpz_mispricing.py`). De las 11 anomalías de SYY (2015) están disponibles 8: emisión neta de acciones (NI), accruals (AC), activos operativos netos (NOA), momentum (r12_2), rentabilidad bruta (PROF), crecimiento de activos (Investment), ROA e inversión sobre activos (DPI2A). Faltan dificultades financieras (CHS), O-score y emisión compuesta. Cada una se orienta para que un percentil alto signifique sobrevaloración, y **M = media de los 8 percentiles**. El corto es el quintil más alto de M, en carteras equiponderadas. Universos: todas las acciones, top 30 % por capitalización (LME), **Top 500 por capitalización (≈S&P 500)** y top 10 %.
 
 Las 8 anomalías apuntan en la dirección esperada, salvo ROA, que en ponderación igual no da alfa en la muestra completa (con FF3 sí en 1967-1986). M combinada: L/S 1,03 %/mes (t=8,4), alfa FF3 1,11 %/mes (t=9,6), frente a 1,48 %/mes con deciles ponderados por capitalización en el paper.
 
 ![Cortos SYY](figures/fig7_cpz_cortos_syy.png)
 
-**Corto cubierto con el mercado EW, 1967-2016 (grandes, top 30 %):**
+**Qué es cada universo.** Los porcentajes de tamaño son relativos al universo de CPZ, no a todo el mercado. CPZ solo incluye acciones con todas sus características disponibles: entre 430 y 2.800 al mes, con una media de ~2.000. Por eso:
 
-| Corto | %/mes | t | Alfa FF3 | Alfa FF6 (con MOM) | Sharpe bruto | Crashes MOM (10 peores meses) |
-|---|---:|---:|---:|---:|---:|---:|
-| Perdedores de momentum (Q1 r12_2) | 0,34 | 3,0 | 0,50 | −0,03 | 0,41 | −9,0 % |
-| Perdedores **no** sobrevalorados (M ≤ Q3) | 0,00 | 0,0 | 0,15 | −0,30 | 0,01 | −9,2 % |
-| **Perdedores Y sobrevalorados (Q5 M)** | **0,71** | 4,9 | 0,89 | 0,30 (t 3,0) | 0,69 | −8,9 % |
-| SYY M: Q5 sobrevaloradas | 0,44 | 6,0 | 0,50 | 0,29 (t 4,6) | **0,88** | **−2,3 %** |
-| SYY M sin momentum: Q5 | 0,35 | 5,0 | 0,36 | 0,27 (t 4,3) | 0,77 | **−0,3 %** |
-| **Sobrevaloradas + alta IVOL** | **0,77** | 4,8 | 0,87 | **0,45 (t 3,5)** | 0,66 | −5,8 % |
+| Universo | Nº de acciones/mes (media; rango) | Equivalencia aproximada |
+|---|---|---|
+| Top 30 % por capitalización | ~610 (130-850) | Algo más amplio que el S&P 500 |
+| **Top 500 por capitalización** | **500** | **≈ S&P 500 (mismo número de valores, los 500 más grandes cada mes)** |
+| Top 10 % | ~200 (40-280) | ≈ S&P 100-200, megacaps |
 
-En **mega empresas** (top 10 %) el patrón se mantiene con menos fuerza: M Q5 0,37 %/mes (t=4,6, Sharpe 0,66) y sobrevaloradas + alta IVOL 0,66 %/mes (t=3,8).
+Antes de 1987 el universo de CPZ es pequeño, y el top 30 % tiene menos de 500 valores. En esos años el "Top 500" incluye empresas medianas.
+
+**Corto cubierto con el mercado EW, 1967-2016, Top 500 por capitalización (≈S&P 500):**
+
+| Corto | %/mes | t | Alfa FF3 | Alfa FF6 (con MOM) | Sharpe bruto | Crashes MOM (10 peores meses) | Nº valores |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Perdedores de momentum (Q1 r12_2) | 0,37 | 3,2 | 0,53 | −0,02 | 0,44 | −9,2 % | 100 |
+| Perdedores **no** sobrevalorados (M ≤ Q3) | 0,01 | 0,1 | 0,15 | −0,29 | 0,01 | −9,1 % | 39 |
+| **Perdedores Y sobrevalorados (Q5 M)** | **0,69** | 4,6 | 0,87 | 0,25 (t 2,4) | 0,65 | −9,4 % | 37 |
+| SYY M: Q5 sobrevaloradas | 0,43 | 5,8 | 0,49 | 0,27 (t 4,4) | **0,84** | **−2,0 %** | 100 |
+| SYY M sin momentum: Q5 | 0,33 | 4,5 | 0,36 | 0,25 (t 3,9) | 0,69 | **−0,3 %** | 100 |
+| **Sobrevaloradas + alta IVOL** | **0,69** | 4,2 | 0,78 | 0,34 (t 2,7) | 0,58 | −5,3 % | 30 |
+
+Comparación de los cortos principales (%/mes, t entre paréntesis) en los tres tamaños:
+
+| Corto cubierto con mercado | Top 30 % | Top 500 | Top 10 % |
+|---|---:|---:|---:|
+| Perdedores de momentum | 0,34 (3,0) | 0,37 (3,2) | 0,26 (2,2) |
+| Perdedores Y sobrevalorados | 0,71 (4,9) | 0,69 (4,6) | 0,50 (3,0) |
+| SYY M: Q5 | 0,44 (6,0) | 0,43 (5,8) | 0,37 (4,6) |
+| Sobrevaloradas + alta IVOL | 0,77 (4,8) | 0,69 (4,2) | 0,66 (3,8) |
+
+El Top 500 da prácticamente lo mismo que el top 30 %. En las ~200 megacaps los efectos se reducen entre un 15 y un 30 %, pero siguen siendo significativos. La excepción es el alfa FF6 de "perdedores y sobrevalorados", que en megacaps cae a 0,04 (t 0,3).
 
 ![Acumulado](figures/fig10_cpz_acumulado_grandes.png)
 
 **Lectura:**
 1. **Todo el valor del corto de momentum está en los perdedores sobrevalorados.** Los perdedores que el resto de anomalías no considera sobrevalorados no rinden nada como corto y caen igual en los crashes. Es justo lo que predicen SYY: la parte de la anomalía que funciona en corto es la sobrevaloración que el arbitraje no puede corregir.
 2. **La puntuación M sin momentum es el corto más estable**: Sharpe 0,77 y casi nada de pérdida en los crashes de momentum (−0,3 %). Es un buen complemento diversificador del corto FIP.
-3. **Volatilidad idiosincrática** (tabla 5×5 como en SYY 2015): en el quintil más sobrevalorado, el alfa FF3 va de −0,12 % (IVOL baja) a **−0,86 %/mes (IVOL alta, t=−5,3)** en grandes empresas. La diferencia IVOL alta − baja es −0,74 %/mes (t=−3,8). En el quintil infravalorado no hay efecto. Es la asimetría del arbitraje: cortar es caro y arriesgado, sobre todo con alta volatilidad, así que la sobrevaloración persiste.
+3. **Volatilidad idiosincrática** (tabla 5×5 como en SYY 2015): en el quintil más sobrevalorado del Top 500, el alfa FF3 va de −0,03 % (IVOL baja) a **−0,74 %/mes (IVOL alta, t=−4,6)**. La diferencia IVOL alta − baja es −0,71 %/mes (t=−3,6). En el quintil infravalorado no hay efecto. Es la asimetría del arbitraje: cortar es caro y arriesgado, sobre todo con alta volatilidad, así que la sobrevaloración persiste.
 
 ![Mispricing x IVOL](figures/fig8_cpz_mispricing_x_ivol.png)
 
 4. **Sentimiento (Baker-Wurgler ortogonalizado, mes anterior por encima o por debajo de la mediana):**
 
-| Grandes, corto cubierto con mercado | Tras sentimiento ALTO | Tras sentimiento BAJO | Diferencia (t) |
+| Top 500, corto cubierto con mercado | Tras sentimiento ALTO | Tras sentimiento BAJO | Diferencia (t) |
 |---|---:|---:|---:|
-| Perdedores de momentum | 0,36 | 0,32 | 0,04 (0,2) |
-| SYY M: Q5 | 0,61 | 0,27 | **0,34 (2,5)** |
-| Perdedores Y sobrevalorados | 0,90 | 0,53 | 0,38 (1,3) |
-| Sobrevaloradas + alta IVOL | **1,21** | 0,32 | **0,88 (2,9)** |
+| Perdedores de momentum | 0,39 | 0,34 | 0,05 (0,2) |
+| SYY M: Q5 | 0,59 | 0,27 | **0,32 (2,3)** |
+| Perdedores Y sobrevalorados | 0,88 | 0,51 | 0,36 (1,2) |
+| Sobrevaloradas + alta IVOL | **1,13** | 0,25 | **0,87 (2,8)** |
 
 Se reproduce el resultado de SYY (2012): **los cortos de sobrevaloración rinden sobre todo tras sentimiento alto**. El momentum puro, en cambio, no depende del sentimiento.
 
 ![Sentimiento](figures/fig9_cpz_sentimiento.png)
 
-5. **Fuera de la muestra del paper (2011-2016, grandes):** M Q5 0,52 %/mes (t=2,4), M sin momentum 0,48 (t=2,4), perdedores y sobrevalorados 0,80 (t=1,8), perdedores de momentum 0,29 (t=1,1) y perdedores no sobrevalorados −0,22. Solo son 6 años, pero el patrón se mantiene.
-6. **Costes.** La rotación mensual es del 13 % para M Q5 y del 27-56 % para los cortos con momentum o IVOL. Con 10 pb por operación, el Sharpe neto aproximado de M Q5 en grandes empresas pasa de 0,88 a 0,83. No incluye el coste de préstamo, que en acciones sobrevaloradas con alta IVOL puede ser alto (Drechsler y Drechsler, 2014).
+5. **Fuera de la muestra del paper (2011-2016, Top 500):** M Q5 0,47 %/mes (t=1,9), M sin momentum 0,47 (t=2,1), perdedores y sobrevalorados 0,86 (t=1,8), sobrevaloradas + alta IVOL 1,04 (t=2,2), perdedores de momentum 0,27 (t=1,0) y perdedores no sobrevalorados −0,28. Solo son 6 años, pero el patrón se mantiene.
+6. **Costes.** La rotación mensual es del 13 % para M Q5 y del 27-56 % para los cortos con momentum o IVOL. Con 10 pb por operación, el Sharpe neto aproximado de M Q5 en el top 30 % pasa de 0,88 a 0,83. No incluye el coste de préstamo, que en acciones sobrevaloradas con alta IVOL puede ser alto (Drechsler y Drechsler, 2014).
 
 **Implicaciones para la estrategia corta:**
 * **Filtrar el corto FIP o de momentum por la puntuación M**: cortar solo perdedores que además estén en el quintil sobrevalorado. Duplica el retorno del corto y deja un alfa FF6 positivo, que el momentum solo no tiene.

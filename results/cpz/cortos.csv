@@ -41,6 +41,27 @@ Grandes (top 30% LME),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),L/S: Q1 M larg
 Grandes (top 30% LME),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),"corto solo (−R, exceso s/ T-bill)",-0.4234,-2.0580,0.1163,0.9188,0.1582,1.3303,16.6933,-0.3044,600,14.4517,0.7108,-0.4066
 Grandes (top 30% LME),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),corto cubierto con mercado EW,0.2136,1.8704,0.1300,1.1509,0.1671,1.4749,9.2374,0.2774,600,14.4517,0.7108,0.0928
 Grandes (top 30% LME),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),L/S: Q1 M largo − corto,0.5038,4.0349,0.4684,3.5498,0.3232,2.4353,10.0509,0.6015,600,14.4517,0.7108,0.2621
+Top 500 (≈S&P 500),SYY M: Q5 sobrevaloradas,"corto solo (−R, exceso s/ T-bill)",-0.2417,-0.9098,0.4414,4.1711,0.2374,2.4987,21.5479,-0.1346,600,99.8700,0.1285,-0.1489
+Top 500 (≈S&P 500),SYY M: Q5 sobrevaloradas,corto cubierto con mercado EW,0.4320,5.8365,0.4872,7.0899,0.2747,4.4106,6.1358,0.8448,600,99.8700,0.1285,0.7945
+Top 500 (≈S&P 500),SYY M: Q5 sobrevaloradas,L/S: Q1 M largo − corto,0.7168,5.6971,0.8211,6.9086,0.4118,3.9452,10.3939,0.8275,600,99.8700,0.1285,0.7682
+Top 500 (≈S&P 500),SYY M sin momentum: Q5,"corto solo (−R, exceso s/ T-bill)",-0.3438,-1.3082,0.3106,3.1027,0.2161,2.2139,21.1512,-0.1950,600,99.8700,0.0855,-0.2047
+Top 500 (≈S&P 500),SYY M sin momentum: Q5,corto cubierto con mercado EW,0.3299,4.5180,0.3565,5.4030,0.2534,3.9281,5.7140,0.6929,600,99.8700,0.0855,0.6570
+Top 500 (≈S&P 500),SYY M sin momentum: Q5,L/S: Q1 M largo − corto,0.6147,5.0083,0.6904,6.0287,0.3905,3.6353,9.7072,0.7599,600,99.8700,0.0855,0.7176
+Top 500 (≈S&P 500),Momentum: Q1 perdedores,"corto solo (−R, exceso s/ T-bill)",-0.3069,-1.0884,0.4830,3.4688,-0.0568,-0.6808,23.2180,-0.1586,600,99.8650,0.2651,-0.1860
+Top 500 (≈S&P 500),Momentum: Q1 perdedores,corto cubierto con mercado EW,0.3668,3.1673,0.5288,4.8512,-0.0195,-0.3109,10.0207,0.4393,600,99.8650,0.2651,0.3758
+Top 500 (≈S&P 500),Momentum: Q1 perdedores,L/S: Q1 M largo − corto,0.6516,4.2203,0.8627,5.8895,0.1176,1.2373,13.4878,0.5797,600,99.8650,0.2651,0.4854
+Top 500 (≈S&P 500),Perdedoras Y sobrevaloradas (Q1 mom & Q5 M),"corto solo (−R, exceso s/ T-bill)",0.0209,0.0672,0.8249,4.7822,0.2144,1.7033,25.8015,0.0097,600,37.3333,0.3085,-0.0190
+Top 500 (≈S&P 500),Perdedoras Y sobrevaloradas (Q1 mom & Q5 M),corto cubierto con mercado EW,0.6946,4.6403,0.8708,6.1223,0.2517,2.3761,12.9083,0.6457,600,37.3333,0.3085,0.5884
+Top 500 (≈S&P 500),Perdedoras Y sobrevaloradas (Q1 mom & Q5 M),L/S: Q1 M largo − corto,0.9794,5.1413,1.2047,6.6644,0.3888,2.8956,16.4695,0.7136,600,37.3333,0.3085,0.6237
+Top 500 (≈S&P 500),Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3),"corto solo (−R, exceso s/ T-bill)",-0.6661,-2.5118,0.1073,0.7889,-0.3296,-3.1842,22.0711,-0.3621,600,38.6133,0.3675,-0.4021
+Top 500 (≈S&P 500),Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3),corto cubierto con mercado EW,0.0076,0.0655,0.1531,1.3769,-0.2924,-3.0449,10.1879,0.0090,600,38.6133,0.3675,-0.0776
+Top 500 (≈S&P 500),Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3),L/S: Q1 M largo − corto,0.2924,2.0399,0.4870,3.5095,-0.1553,-1.3467,12.7459,0.2753,600,38.6133,0.3675,0.1369
+Top 500 (≈S&P 500),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),"corto solo (−R, exceso s/ T-bill)",0.0149,0.0439,0.7355,4.6036,0.3072,2.0533,28.1123,0.0064,600,29.5750,0.5583,-0.0413
+Top 500 (≈S&P 500),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),corto cubierto con mercado EW,0.6886,4.1629,0.7814,5.7303,0.3445,2.6898,14.3176,0.5771,600,29.5750,0.5583,0.4835
+Top 500 (≈S&P 500),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),L/S: Q1 M largo − corto,0.9734,4.7160,1.1153,6.4370,0.4816,3.0736,17.6974,0.6600,600,29.5750,0.5583,0.5086
+Top 500 (≈S&P 500),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),"corto solo (−R, exceso s/ T-bill)",-0.5167,-2.5149,0.0285,0.2080,0.0323,0.2574,17.1930,-0.3606,600,11.8867,0.7187,-0.4610
+Top 500 (≈S&P 500),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),corto cubierto con mercado EW,0.1570,1.3463,0.0744,0.6277,0.0696,0.6016,9.3943,0.2005,600,11.8867,0.7187,0.0169
+Top 500 (≈S&P 500),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),L/S: Q1 M largo − corto,0.4418,3.4031,0.4083,2.8990,0.2067,1.5354,10.4562,0.5070,600,11.8867,0.7187,0.1771
 Mega (top 10% LME),SYY M: Q5 sobrevaloradas,"corto solo (−R, exceso s/ T-bill)",-0.1873,-0.7882,0.3513,3.0417,0.1441,1.3829,19.8241,-0.1134,600,41.1100,0.1404,-0.1304
 Mega (top 10% LME),SYY M: Q5 sobrevaloradas,corto cubierto con mercado EW,0.3700,4.6399,0.4214,5.0398,0.1993,2.7708,6.7284,0.6600,600,41.1100,0.1404,0.6099
 Mega (top 10% LME),SYY M: Q5 sobrevaloradas,L/S: Q1 M largo − corto,0.6297,4.5872,0.7075,4.9720,0.2821,2.2399,11.4449,0.6603,600,41.1100,0.1404,0.6014

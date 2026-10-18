@@ -30,7 +30,15 @@ ANOMALIES = {
     "ROA": -1,         # return on assets (Fama-French 2006; Chen-Novy-Marx-Zhang)
     "DPI2A": +1,       # investment-to-assets (Titman-Wei-Xie 2004)
 }
-SIZES = {"Todas": -1.0, "Grandes (top 30% LME)": 0.2, "Mega (top 10% LME)": 0.4}
+# float = LME rank cut-off; int = top-N stocks by LME each month (500 ~ S&P 500 by count)
+SIZES = {"Todas": -1.0, "Grandes (top 30% LME)": 0.2, "Top 500 (≈S&P 500)": 500,
+         "Mega (top 10% LME)": 0.4}
+
+
+def size_filter(p, cut):
+    if isinstance(cut, int):
+        return p[p.groupby("month").LME.rank(ascending=False, method="first") <= cut].copy()
+    return p[p.LME > cut].copy()
 COST = 0.0010  # one-way, for net figures
 
 
@@ -105,7 +113,7 @@ def main():
     # 2. M quintiles by size bucket, short leg and hedges
     res = []
     for sz, cut in SIZES.items():
-        d = p[p.LME > cut].copy()
+        d = size_filter(p, cut)
         d["qM"] = d.groupby("month").M.transform(lambda x: bins(x, 5))
         d["qMom"] = d.groupby("month").r12_2.transform(lambda x: bins(x, 5))
         d["qM2"] = d.groupby("month").M_sin_mom.transform(lambda x: bins(x, 5))
@@ -144,7 +152,7 @@ def main():
 
     # 3. 5x5 independent sort M x IVOL (SYY 2015, Table II): FF3 alpha, %/month
     for sz, cut in SIZES.items():
-        d = p[p.LME > cut].copy()
+        d = size_filter(p, cut)
         d["qM"] = d.groupby("month").M.transform(lambda x: bins(x, 5))
         d["qIV"] = d.groupby("month").IdioVol.transform(lambda x: bins(x, 5))
         r = d.groupby(["month", "qM", "qIV"]).ret.mean().unstack(["qM", "qIV"])

@@ -11,7 +11,7 @@ from make_figures import C, FIG, GRID, INK, MUTED  # shared style
 
 OUT = data.ROOT / "results" / "cpz"
 HEDGED = "corto cubierto con mercado EW"
-UNIV = ["Todas", "Grandes (top 30% LME)", "Mega (top 10% LME)"]
+UNIV = ["Todas", "Grandes (top 30% LME)", "Top 500 (≈S&P 500)", "Mega (top 10% LME)"]
 STRATS = {
     "Momentum: Q1 perdedores": "Perdedores momentum",
     "Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3)": "Perdedores NO sobrevalorados",
@@ -24,14 +24,14 @@ STRATS = {
 def fig_shorts():
     c = pd.read_csv(OUT / "cortos.csv")
     c = c[c.pierna == HEDGED]
-    fig, ax = plt.subplots(figsize=(10, 4))
+    fig, ax = plt.subplots(figsize=(10, 5))
     y = np.arange(len(STRATS))
-    h = 0.26
+    h = 0.2
     for i, u in enumerate(UNIV):
         g = c[c.universo == u].set_index("estrategia").reindex(list(STRATS))
-        ax.barh(y + (i - 1) * h, g["alfa_FF3_%mes"], h * 0.9, color=C[i], label=u)
+        ax.barh(y + (i - 1.5) * h, g["alfa_FF3_%mes"], h * 0.9, color=C[i], label=u)
         for yi, v, t in zip(y, g["alfa_FF3_%mes"], g["t_FF3"]):
-            ax.text(v, yi + (i - 1) * h, f" {v:.2f} (t {t:.1f})", va="center", fontsize=7, color=INK)
+            ax.text(v, yi + (i - 1.5) * h, f" {v:.2f} (t {t:.1f})", va="center", fontsize=6.5, color=INK)
     ax.set_yticks(y, list(STRATS.values()))
     ax.invert_yaxis()
     ax.axvline(0, color=MUTED, lw=0.8)
@@ -46,7 +46,7 @@ def fig_shorts():
 def fig_heatmap():
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.0))
     fig.subplots_adjust(wspace=0.35, top=0.84)
-    for ax, u in zip(axes, ["Todas", "Grandes"]):
+    for ax, u in zip(axes, ["Todas", "Top"]):
         a = pd.read_csv(OUT / f"ivol_x_M_alpha_{u}.csv", index_col=0)
         t = pd.read_csv(OUT / f"ivol_x_M_t_{u}.csv", index_col=0)
         v = a.iloc[:, :5].values
@@ -60,7 +60,7 @@ def fig_heatmap():
         ax.set_xticks(range(5), ["IVOL baja", "2", "3", "4", "IVOL alta"])
         ax.set_yticks(range(5), ["M Q1 infraval.", "Q2", "Q3", "Q4", "M Q5 sobreval."])
         ax.grid(False)
-        ax.set_title(f"{'Todas las acciones' if u == 'Todas' else 'Grandes (top 30% tamaño)'}",
+        ax.set_title(f"{'Todas las acciones' if u == 'Todas' else 'Top 500 por capitalización (≈S&P 500)'}",
                      loc="left", color=INK)
     fig.suptitle("Alfa FF3 mensual (%) por mispricing SYY × volatilidad idiosincrática (t entre paréntesis)",
                  x=0.01, ha="left", color=INK, fontsize=11)
@@ -75,7 +75,7 @@ def fig_sentiment():
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.2), sharey=True)
     fig.subplots_adjust(top=0.80)
     short = {n: STRATS[n].replace(" ", "\n", 1) for n in names}
-    for ax, u in zip(axes, ["Todas", "Grandes (top 30% LME)"]):
+    for ax, u in zip(axes, ["Todas", "Top 500 (≈S&P 500)"]):
         g = s[s.universo == u].set_index("estrategia").reindex(names)
         x = np.arange(len(names))
         ax.bar(x - 0.2, g["media_alto_%mes"], 0.38, color=C[1], label="Tras sentimiento ALTO")
@@ -96,7 +96,7 @@ def fig_sentiment():
 
 def fig_cum():
     ser = pd.read_parquet(OUT / "series.parquet")
-    u = "Grandes (top 30% LME)"
+    u = "Top 500 (≈S&P 500)"
     names = ["Momentum: Q1 perdedores", "Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3)",
              "Perdedoras Y sobrevaloradas (Q1 mom & Q5 M)", "SYY M: Q5 sobrevaloradas"]
     fig, ax = plt.subplots(figsize=(9, 4))
@@ -111,7 +111,7 @@ def fig_cum():
     ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0.5, 1, 2, 4, 8, 16, 32]))
     ax.axhline(1, color=MUTED, lw=0.8)
     ax.set_ylabel("Crecimiento de 1 (log), bruto")
-    ax.set_title("Corto cubierto con mercado, empresas grandes (top 30%), 1967-2016",
+    ax.set_title("Corto cubierto con mercado, top 500 por capitalización (≈S&P 500), 1967-2016",
                  loc="left", color=INK)
     ax.legend(fontsize=8, loc="upper left")
     fig.savefig(FIG / "fig10_cpz_acumulado_grandes.png")

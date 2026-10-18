@@ -55,6 +55,34 @@ Grandes (top 30% LME),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),1967-1989,0.25
 Grandes (top 30% LME),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),1990-2010,0.3249,1.6210,0.4051
 Grandes (top 30% LME),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),2011-2016 (post SYY),-0.3254,-1.5992,-0.5870
 Grandes (top 30% LME),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),10 peores meses MOM,2.1425,,
+Top 500 (≈S&P 500),SYY M: Q5 sobrevaloradas,1967-1989,0.5473,5.5067,1.2352
+Top 500 (≈S&P 500),SYY M: Q5 sobrevaloradas,1990-2010,0.2951,2.5124,0.5243
+Top 500 (≈S&P 500),SYY M: Q5 sobrevaloradas,2011-2016 (post SYY),0.4689,1.9338,0.8351
+Top 500 (≈S&P 500),SYY M: Q5 sobrevaloradas,10 peores meses MOM,-2.0112,,
+Top 500 (≈S&P 500),SYY M sin momentum: Q5,1967-1989,0.3767,3.6831,0.8768
+Top 500 (≈S&P 500),SYY M sin momentum: Q5,1990-2010,0.2381,2.0664,0.4651
+Top 500 (≈S&P 500),SYY M sin momentum: Q5,2011-2016 (post SYY),0.4724,2.0892,0.9140
+Top 500 (≈S&P 500),SYY M sin momentum: Q5,10 peores meses MOM,-0.3341,,
+Top 500 (≈S&P 500),Momentum: Q1 perdedores,1967-1989,0.5253,3.8867,0.8200
+Top 500 (≈S&P 500),Momentum: Q1 perdedores,1990-2010,0.2202,1.0121,0.2119
+Top 500 (≈S&P 500),Momentum: Q1 perdedores,2011-2016 (post SYY),0.2727,1.0099,0.4014
+Top 500 (≈S&P 500),Momentum: Q1 perdedores,10 peores meses MOM,-9.2001,,
+Top 500 (≈S&P 500),Perdedoras Y sobrevaloradas (Q1 mom & Q5 M),1967-1989,0.9446,5.6303,1.2324
+Top 500 (≈S&P 500),Perdedoras Y sobrevaloradas (Q1 mom & Q5 M),1990-2010,0.3735,1.3998,0.2792
+Top 500 (≈S&P 500),Perdedoras Y sobrevaloradas (Q1 mom & Q5 M),2011-2016 (post SYY),0.8602,1.8047,0.8180
+Top 500 (≈S&P 500),Perdedoras Y sobrevaloradas (Q1 mom & Q5 M),10 peores meses MOM,-9.3947,,
+Top 500 (≈S&P 500),Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3),1967-1989,0.0973,0.6358,0.1329
+Top 500 (≈S&P 500),Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3),1990-2010,-0.0083,-0.0399,-0.0082
+Top 500 (≈S&P 500),Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3),2011-2016 (post SYY),-0.2801,-1.1594,-0.4674
+Top 500 (≈S&P 500),Perdedoras NO sobrevaloradas (Q1 mom & M<=Q3),10 peores meses MOM,-9.0771,,
+Top 500 (≈S&P 500),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),1967-1989,0.8863,4.4041,0.9240
+Top 500 (≈S&P 500),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),1990-2010,0.3728,1.2716,0.2603
+Top 500 (≈S&P 500),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),2011-2016 (post SYY),1.0363,2.2323,0.9692
+Top 500 (≈S&P 500),Sobrevaloradas Y alta IVOL (Q5 M & Q5 IVOL),10 peores meses MOM,-5.2768,,
+Top 500 (≈S&P 500),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),1967-1989,0.3821,2.6390,0.5371
+Top 500 (≈S&P 500),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),1990-2010,0.1206,0.5663,0.1357
+Top 500 (≈S&P 500),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),2011-2016 (post SYY),-0.5785,-2.7777,-0.9715
+Top 500 (≈S&P 500),Sobrevaloradas Y baja IVOL (Q5 M & Q1 IVOL),10 peores meses MOM,1.8698,,
 Mega (top 10% LME),SYY M: Q5 sobrevaloradas,1967-1989,0.3216,3.4493,0.6586
 Mega (top 10% LME),SYY M: Q5 sobrevaloradas,1990-2010,0.3083,2.1713,0.4935
 Mega (top 10% LME),SYY M: Q5 sobrevaloradas,2011-2016 (post SYY),0.7718,3.2796,1.3366
