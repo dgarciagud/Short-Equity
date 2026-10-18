@@ -1,4 +1,8 @@
-"""Live Stambaugh-Yu-Yuan mispricing score from SEC XBRL (companyfacts) + prices.
+"""Live Stambaugh-Yu-Yuan mispricing score (weekly), on the ML4T repository's data stack.
+
+Fundamentals: SEC XBRL Frames panels built with the repo's xbrl_download.py (repo_xbrl.py).
+Prices: ml4t-data Yahoo provider (repo_prices.py). The companyfacts helpers below
+(`download`, `fundamentals`) are kept only as a cross-check of the Frames data.
 
 Universe: S&P 500 stocks available as CFDs on Darwinex (data/darwinex/spread_history.csv).
 For each company only facts FILED on or before --asof are used (no look-ahead);
@@ -16,7 +20,7 @@ for a given period the most recently filed value is taken (restated / split-adju
 M = mean of the available percentiles (at least 5 of 8 required).
 
 Usage:
-  SEC_USER_AGENT="Your Name your@email" python src/live_syy.py [--asof YYYY-MM-DD]
+  SEC_USER_AGENT="Your Name your@email" python src/live_syy.py --refresh [--asof YYYY-MM-DD]
        [--holdings data/live/holdings.csv]
 """
 import argparse
@@ -280,58 +284,60 @@ def trade_list(df, holdings, n=N_SHORT, max_changes=3):
 
 
 def main():
+    """Weekly run on the ML4T-repo data stack: SEC Frames panels (repo_xbrl.py, built with
+    the repo's xbrl_download.py) + ml4t-data Yahoo prices (repo_prices.py)."""
+    from recent_backtest import SIGN as _S, asof as _asof, feature_tables
+    from repo_prices import main as refresh_prices
+    from repo_xbrl import OUT as FRAMES, build, universe
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--asof", default=str(date.today()))
     ap.add_argument("--holdings", default=str(data.DATA / "live" / "holdings.csv"))
+    ap.add_argument("--refresh", action="store_true", help="re-download SEC frames and prices")
     args = ap.parse_args()
     asof = pd.Timestamp(args.asof)
-    SEC.mkdir(parents=True, exist_ok=True)
     LIVE.mkdir(parents=True, exist_ok=True)
+    uni = universe()
+    if args.refresh:
+        build(dict(zip(uni.cik, uni.symbol)), list(range(asof.year - 2, asof.year + 1)),
+              out=FRAMES.parent / "frames_live")
+        refresh_prices(str((asof - timedelta(days=430)).date()), str((asof + timedelta(days=1)).date()))
 
-    dx = pd.read_csv(data.DATA / "darwinex" / "spread_history.csv")
-    sp = pd.read_csv(data.DATA / "sp500_constituents_gics.csv")
-    sp["mt5"] = sp.symbol.str.replace(".", "", regex=False)
-    stocks = dx[(dx.swap_mode == 5) & (dx.contract_size == 1)]
-    uni = sp[sp.mt5.isin(stocks.symbol)].copy()
-    uni = uni.merge(stocks[["symbol", "avg_spread_bps", "last_price"]].rename(columns={"symbol": "mt5"}), on="mt5")
-    tickers = uni.symbol.tolist()
-    print(f"Universo: {len(tickers)} acciones S&P 500 disponibles en Darwinex", file=sys.stderr)
-
-    cmap = cik_map()
-    missing = download(tickers, cmap)
-    rows = [r for t in tickers if (r := fundamentals(t, asof)) is not None]
-    f = pd.DataFrame(rows).set_index("ticker")
-    r12, last = momentum(tickers, asof)
-    df = uni.set_index("symbol")[["name", "sector", "mt5", "avg_spread_bps"]].join(f).join(r12).join(last)
+    live = FRAMES.parent / "frames_live"
+    f = _asof(feature_tables(live if (live / "annual.parquet").exists() else FRAMES), asof)
+    f.index = f.index.map(dict(zip(uni.cik, uni.symbol)))
+    px = pd.read_parquet(data.DATA / "prices_darwinex_universe.parquet")
+    px = px[px.index <= asof]
+    me = px.resample("ME").last()
+    me = me[me.index < asof.to_period("M").to_timestamp()]          # completed months only
+    f["r12_2"] = (me.iloc[-1] / me.iloc[-12] - 1).reindex(f.index)  # t-12 -> t-1
+    df = uni.set_index("symbol")[["name", "sector", "mt5", "avg_spread_bps"]].join(f)
+    df["precio"] = px.iloc[-1].reindex(df.index)
     df = score(df)
-    df["dias_desde_presentacion"] = (asof - pd.to_datetime(df.presentado)).dt.days
-    df["meses_desde_cierre"] = ((asof - pd.to_datetime(df.periodo)).dt.days / 30.4).round(1)
     stamp = asof.date().isoformat()
     df.to_csv(LIVE / f"syy_score_{stamp}.csv", float_format="%.4f")
 
+    cols = ["mt5", "name", "sector", "M", "n_anomalias", "precio", "avg_spread_bps"] + list(_S)
     shorts = df[df.rank_sobrevalorada <= N_SHORT + N_BACKUP]
+    capped = sector_capped(df, N_SHORT + N_BACKUP)
     longs = df.sort_values("M").head(N_SHORT)
     hold_path = Path(args.holdings)
     holdings = pd.read_csv(hold_path).ticker.tolist() if hold_path.exists() else []
     out, new = trade_list(df, holdings)
-    cols = ["mt5", "name", "sector", "M", "n_anomalias", "precio", "avg_spread_bps", "r12_2",
-            "periodo", "presentado", "meses_desde_cierre"]
-    capped = sector_capped(df, N_SHORT + N_BACKUP)
     with open(LIVE / f"syy_orders_{stamp}.md", "w") as fh:
-        fh.write(f"# Puntuación SYY a {stamp}\n\n")
-        fh.write(f"Universo: {len(df)} acciones ({df.M.notna().sum()} con puntuación). "
-                 f"Sin CIK en la SEC: {', '.join(missing) or 'ninguna'}.\n\n")
-        fh.write("## Cortos: 10 más sobrevaloradas (y 10 suplentes por si no se pueden cortar)\n\n")
-        fh.write(shorts[cols].round(3).to_markdown() + "\n\n")
-        fh.write("## Cortos con límite de 3 por sector (recomendado: evita apostar a un sector)\n\n")
+        fh.write(f"# Puntuación SYY a {stamp} (datos SEC Frames vía repo ML4T + precios ml4t-data)\n\n")
+        fh.write(f"Universo: {len(df)} acciones ({df.M.notna().sum()} con puntuación).\n\n")
+        fh.write("## Cortos con límite de 3 por sector (recomendado)\n\n")
         fh.write(capped[cols].round(3).to_markdown() + "\n\n")
-        fh.write("## Largos alternativos: 10 más infravaloradas (si no se cubre con SPY)\n\n")
+        fh.write("## Cortos sin límite sectorial (10 + 10 suplentes)\n\n")
+        fh.write(shorts[cols].round(3).to_markdown() + "\n\n")
+        fh.write("## Largos alternativos: 10 más infravaloradas\n\n")
         fh.write(longs[cols].round(3).to_markdown() + "\n\n")
         if holdings:
             fh.write(f"## Órdenes de esta semana (cartera actual: {', '.join(holdings)})\n\n")
             fh.write(f"* Cerrar cortos: {', '.join(out) or 'ninguno'}\n")
             fh.write(f"* Abrir cortos: {', '.join(new) or 'ninguno'}\n")
-    print(df[cols].head(N_SHORT + N_BACKUP).round(3).to_string())
+    print(capped[cols].round(3).to_string())
     print(f"\nEscrito: results/live/syy_score_{stamp}.csv y syy_orders_{stamp}.md", file=sys.stderr)
 
 
