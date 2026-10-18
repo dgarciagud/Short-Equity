@@ -28,7 +28,6 @@ from repo_xbrl import OUT as FRAMES, universe
 
 SOURCE = sys.argv[1] if len(sys.argv) > 1 else "frames"          # frames | companyfacts
 OUT = data.ROOT / "results" / "recent" / SOURCE
-OUT.mkdir(parents=True, exist_ok=True)
 SIGN = {"NI": 1, "AC": 1, "NOA": 1, "r12_2": -1, "PROF": -1, "AG": 1, "ROA": -1, "DPI2A": 1}
 COMM = 0.000127
 SPY_SIDE = 0.000025
@@ -57,6 +56,7 @@ CF_PANELS = {"instant": (None, ["assets", "liabilities", "liab_equity", "equity"
              "quarterly": ((80, 100), ["net_income"]), "shares": ((80, 100), ["shares"]),
              "annual": ((350, 380), ["net_income", "cfo", "gross_profit", "revenue", "cogs"])}
 _CF = {}
+CF_UNIVERSE = None   # [(ticker of the cached facts file, cik)]; default: today's Darwinex universe
 
 
 def load_cf(name):
@@ -64,13 +64,18 @@ def load_cf(name):
     as-filed value dated by its own filing (live_syy.download cache, data/sec/facts)."""
     if "facts" not in _CF:
         from live_syy import SEC
-        uni = universe()
+        if CF_UNIVERSE is None:
+            uni = universe()
+            files = zip(uni.symbol, uni.cik)
+        else:
+            files = CF_UNIVERSE
         parts = []
-        for tic, cik in zip(uni.symbol, uni.cik):
+        for tic, cik in files:
             f = SEC / "facts" / f"{tic}.parquet"
             if f.exists():
                 parts.append(pd.read_parquet(f).assign(cik=cik))
         x = pd.concat(parts)
+        x["val"] = pd.to_numeric(x.val, errors="coerce").astype(float)
         x["end"] = pd.to_datetime(x.end)
         x["start"] = pd.to_datetime(x.start)
         x["filed"] = pd.to_datetime(x.filed)
@@ -168,6 +173,7 @@ def stats(r, ppy=12):
 
 
 def main():
+    OUT.mkdir(parents=True, exist_ok=True)
     uni = universe().drop_duplicates("cik").set_index("cik")
     sym = uni.symbol
     half_spread = (uni.set_index("symbol").avg_spread_bps / 2 / 1e4)

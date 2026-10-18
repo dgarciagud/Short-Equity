@@ -19,6 +19,7 @@ la parrilla completa en `results/grid_stats.csv`) y gráficos en `figures/`.
 | ¿FIP es mejor que el momentum corto clásico o que los perdedores de ID alto? | **Sin evidencia en mis datos, pero el paper sí lo muestra.** En mis muestras la diferencia frente a MOM o DISC es pequeña, de signo variable y casi nunca significativa. Sin embargo, mi muestra sin sesgo (AlgoSeek) solo cubre 5 años y no tiene potencia para detectar el efecto. Da, Gurun y Warachka (2014), con CRSP 1927-2007 sin sesgo, encuentran que los perdedores de caída continua rinden ~6 pp menos en 6 meses que los de caída brusca, también en grandes empresas aunque con menos fuerza (§4). |
 | ¿Qué perdedores conviene cortar? (Chen-Pelger-Zhu, CRSP 1967-2016, **sin sesgo**) | **Los perdedores que además están sobrevalorados** según la puntuación de Stambaugh, Yu y Yuan. En el Top 500 por capitalización (≈S&P 500), el corto cubierto con mercado rinde 0,69 %/mes (t=4,6) y los perdedores **no** sobrevalorados, 0,01 %/mes. La propia puntuación SYY (quintil más sobrevalorado) rinde 0,43 %/mes (t=5,8, Sharpe 0,84), y combinada con alta volatilidad idiosincrática, 0,69 %/mes. Funciona sobre todo tras sentimiento inversor alto y sigue funcionando en 2011-2016, después de la muestra del paper (§10). |
 | ¿Gana dinero el corto de momentum en sí? | **No, después de costes**, en ninguna de las dos muestras: Sharpe neto entre −0,3 y −0,9 cubriendo con el mercado. Parte es sesgo de supervivencia en la muestra larga, pero también pierde en la muestra *point-in-time* 2017-2021. |
+| ¿Sigue funcionando hoy? (S&P 500 histórico 2012-2026, datos SEC) | **Sí, pero de forma modesta.** Con la composición del índice en cada fecha, 10 cortos sobrevalorados cubiertos con SPY ganan +0,42 %/mes neto en Darwinex Zero (t = 1,8) y el quintil sobrevalorado bate al mercado (+0,23 %/mes, t = 2,7). Con los miembros actuales salía ~0: era sesgo de supervivencia. 2017-2021 fue plano y en Classic los swaps se comen casi todo (§12.b). |
 | ¿Semanal o mensual? | **Mensual.** En semanal la rotación (36-85 % por semana) cuesta 5-10 pp/año y la reversión a 1 semana castiga a los cortos. |
 | Sector como **señal** | El doble filtro (FIP dentro de sector perdedor) **mejora** el FIP mensual: Sharpe −0,28 → +0,06 en Yahoo 1 m, y +0,19 si el sector también cae de forma gradual (ID sectorial bajo). Pero lo hace con la mitad de nombres y más volatilidad, y el momentum sectorial puro (11 sectores GICS) **no** funciona solo. |
 | Difusión lenta | **Existe en la muestra larga.** Líderes → rezagados: t=2,0 (mensual). Clientes → proveedores: t=1,9 (mensual) y 2,6 (semanal). Condicionar mejora mucho el corto relativo, pero no lo vuelve rentable en este universo. |
@@ -406,13 +407,53 @@ IC medio de M (correlación de rangos con el retorno del mes siguiente): −0,00
 1. **Con este universo, en 2012-2026 la estrategia no funciona:** el corto concentrado cubierto con SPY queda en ~0 neto, y en Classic pierde por los swaps.
 2. **Hay un sesgo de supervivencia fuerte y en contra de los cortos.** El universo son las empresas que **hoy** están en el S&P 500, es decir, las que crecieron (muchas emitiendo acciones y aumentando activos) y no quebraron. Por eso las anomalías de crecimiento salen invertidas y el corto de perdedores pierde −0,9 %/mes. Con la muestra point-in-time de CPZ, en 2011-2016 la puntuación seguía funcionando en el Top 500 (+0,47 %/mes, t = 1,9). En el mismo periodo, este backtest da ~0 con las empresas supervivientes.
 3. **También hay razones reales para esperar menos:** decaimiento de las anomalías tras su publicación (McLean y Pontiff), anomalías más débiles en grandes empresas fáciles de cortar, y la ausencia de las 3 anomalías más ligadas a dificultades financieras.
-4. **Conclusión:** no hay evidencia reciente suficiente para operar con dinero real. Hace falta repetir el backtest con la **composición histórica del S&P 500** (incluidas las empresas que salieron del índice) para separar el sesgo del verdadero decaimiento. Mientras tanto, **Darwinex Zero** (capital virtual) es un buen sitio para probar en real sin arriesgar capital.
+4. **Conclusión provisional:** con este universo no hay evidencia reciente suficiente. Faltaba repetir el backtest con la **composición histórica del S&P 500** para separar el sesgo del verdadero decaimiento (§12.b).
+
+### 12.b Mismo backtest con la composición histórica del índice (`src/pit_backtest.py`)
+
+**Qué cambia.** En cada fin de mes *t* el universo son las empresas que **estaban en el S&P 500 en *t*** (incluidas las que después salieron por adquisición, quiebra o caída de capitalización), no las de hoy. Todo lo demás es idéntico: fundamentales companyfacts con su fecha real de presentación, las 8 anomalías, carteras, spreads y comisiones de Darwinex (8 bp por lado para los valores sin spread medido).
+
+**Datos.**
+* **Composición**: listas diarias de [fja05680/sp500](https://github.com/fja05680/sp500) (reconstruidas a partir de los cambios de Wikipedia), muestreadas a fin de mes en `data/sp500_membership_monthly.csv`. Son 825 tickers distintos entre 2011 y 2026.
+* **Ticker → CIK** (`data/sp500_hist_cik.json`): primero el `company_tickers.json` de la SEC. Para las empresas que ya no cotizan, el nombre de la tabla de cambios de Wikipedia se cruza con `cik-lookup-data.txt` de la SEC; si hay varios CIK candidatos, se elige el que presentaba 10-K/10-Q. Se corrigen a mano ~60 casos: renombrados (BK→BNY, ANTM→ELV, FB→META) y tickers reciclados por otra empresa (Q, S, STI, SE…).
+* **Precios**: proveedor Yahoo de `ml4t-data` para todos los tickers históricos (`pit_prices.py`). Las barras diarias *point-in-time* de AlgoSeek del repo ML4T cubren 2017-2021, incluidas las empresas excluidas. Los retornos se unen por CIK, así que un cambio de ticker no corta la serie. El mes de salida incluye el retorno hasta el último precio (prima de OPA o desplome).
+* **Cobertura de precios** (miembros con precio en el mes de tenencia): **~75 % en 2012-2016** (Yahoo borra casi todas las adquiridas), **~100 % en 2017-2021** (AlgoSeek) y **94-99 % en 2022-2026**.
+
+**Resultados** (mismo pipeline; "Histórico" = composición en cada fecha, "Actual" = las 420 de hoy):
+
+| Estrategia | Histórico %/mes | t | Sharpe | DD máx. | 2012-16 | 2017-21 | 2022-26 | Actual %/mes (t) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Quintil sobrevalorado vs mercado EW (bruto) | **+0,23** | 2,7 | 0,69 | −7 % | +0,27 | +0,07 | +0,35 | +0,07 (0,8) |
+| Q1 − Q5 (bruto) | **+0,36** | 2,6 | 0,62 | −9 % | +0,44 | +0,30 | +0,34 | +0,10 (0,7) |
+| 10 cortos / SPY, neto Zero | **+0,42** | 1,8 | 0,42 | −27 % | +0,52 | +0,08 | +0,67 | −0,05 (−0,2) |
+| 10 cortos (máx. 3 por sector) / SPY, neto Zero | **+0,43** | 1,9 | 0,44 | −26 % | +0,58 | +0,10 | +0,64 | −0,11 (−0,4) |
+| 10 cortos / 10 largos infravalorados, neto Zero | +0,41 | 1,3 | 0,32 | −25 % | +0,52 | +0,50 | +0,21 | +0,30 (0,8) |
+| 10 cortos (máx. 3 por sector) / SPY, neto Classic | +0,15 | 0,7 | 0,15 | −32 % | +0,29 | −0,19 | +0,35 | −0,40 (−1,5) |
+| Referencia: 10 perdedores de momentum / SPY (bruto) | +0,26 | 0,5 | 0,12 | −68 % | −0,02 | −0,20 | +1,02 | −0,94 (−1,9) |
+
+* **Alfa FF5+MOM** del corto Top10/SPY neto Zero: +0,33 %/mes (t = 1,65); con límite sectorial, +0,36 (t = 1,84). Del quintil vs EW: +0,14 (t = 1,6).
+* **IC medio de M**: −0,016 (t = −2,2) frente a −0,009 (t = −1,3) con los supervivientes.
+* **El 40 % de los 10 cortos de cada mes son empresas que hoy ya no están en el índice.** Son justo las que el universo actual elimina.
+* **El mercado equiponderado** rinde 1,12 %/mes con la composición histórica frente a 1,47 %/mes con los supervivientes: el sesgo de supervivencia vale ~4 pp/año en este universo.
+* **Por anomalía**: NOA sigue siendo la más sólida (−0,18 %/mes, t = −2,4) y la emisión de acciones tiene IC significativo (t = −2,5). Crecimiento de activos y ROA **dejan de salir invertidas** (+0,08 y +0,04, t < 1): su inversión era un artefacto del sesgo.
+
+![Histórico vs supervivientes](figures/fig12_pit_vs_supervivientes.png)
+
+**Lectura.**
+1. **El resultado negativo del §12 era sobre todo sesgo de supervivencia.** Con la composición histórica, la puntuación SYY sigue funcionando en 2012-2026: el corto concentrado gana +0,4 %/mes neto en Zero, aunque con significación solo marginal (t ≈ 1,8-1,9, alfa FF6 t ≈ 1,7-1,8). El quintil sobrevalorado bate al mercado con t = 2,7.
+2. **Hay que descontar 2012-2016.** Falta un 25 % de los miembros, casi todos adquiridos. Las adquiridas suben por la prima de OPA, así que su ausencia probablemente **infla** los cortos de ese tramo.
+3. **El tramo limpio (2017-2021, cobertura completa) es plano:** +0,08 %/mes en el corto Top10/SPY y +0,07 en el quintil. **2022-2026 (≥94 % de cobertura) es el mejor tramo:** +0,67 %/mes, t = 2,0. Es una señal con rachas largas a cero, no una fuente de alfa constante.
+4. **Darwinex Classic no compensa.** Los swaps (~−0,28 %/mes en la cobertura con SPY) se comen dos tercios del rendimiento: +0,15 %/mes, t = 0,7.
+5. **Coste de oportunidad del corto puro de momentum:** sin sesgo pasa de −0,9 a +0,3 %/mes, pero con un drawdown del −68 %. Confirma que la puntuación SYY es mejor filtro que el momentum solo.
+6. **Recomendación:** la estrategia es defendible para **Darwinex Zero** (sin swaps) con tamaño prudente, esperando ~0,4 %/mes con mucha incertidumbre (intervalo del 95 % aproximado: −0,05 a +0,9 %/mes) y drawdowns de ~25-30 %. **No para Classic.** Prioridad de mejora: añadir las 3 anomalías de dificultades financieras que faltan.
 
 ---
 
 ## 13. Limitaciones y siguientes pasos
 
-* **Muestra sin sesgo y larga**: ejecutar `data/equities/market/us_equities/download.py` del repo ML4T con una API key gratuita de NASDAQ Data Link (WIKI 1962-2018) y añadir clasificación SIC/GICS histórica.
+* **Muestra sin sesgo y larga**: ejecutar `data/equities/market/us_equities/download.py` del repo ML4T con una API key gratuita de NASDAQ Data Link (WIKI 1962-2018) y añadir clasificación SIC/GICS histórica. WIKI también taparía el 25 % de miembros sin precio en 2012-2016 del §12.b (hasta marzo de 2018).
+* **Sectores históricos en §12.b**: GICS actual cuando la empresa sigue en las listas y, si no, un mapeo aproximado desde el código SIC de la SEC (solo afecta al límite de 3 por sector).
+* **Disponibilidad real en Darwinex** de los valores que luego salieron del índice: no se puede verificar hacia atrás.
 * **Industrias más finas** (GICS sub-industry históricas o las 49 industrias de Fama-French) para el momentum de industria.
 * **Grafo cliente→proveedor completo** (Compustat Segments / FactSet Revere) en lugar de un mapa manual.
 * **Tamaño real** (capitalización) en lugar de volumen en dólares para líder→rezagado.
@@ -439,6 +480,10 @@ python cpz_build.py && python cpz_mispricing.py && python cpz_figures.py
 # Backtest reciente con las librerías del repo (SEC Frames + ml4t-data) y con companyfacts
 python repo_xbrl.py && python repo_prices.py
 python recent_backtest.py frames && python recent_backtest.py companyfacts
+# Composición histórica del S&P 500 (data/sp500_membership_monthly.csv, data/sp500_hist_cik.json)
+python pit_prices.py                        # precios Yahoo de los 825 miembros históricos
+python -c "import json,data; from live_syy import download; m=json.load(open(data.DATA/'sp500_hist_cik.json')); download(list(m), m, 3650)"
+python pit_backtest.py && python pit_figures.py
 ```
 
 ### Referencias
