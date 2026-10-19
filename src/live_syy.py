@@ -343,6 +343,7 @@ def main():
     ap.add_argument("--currency", choices=["EUR", "USD"], default="EUR")
     ap.add_argument("--gross", type=float, default=1.0, help="short notional / equity (same for the SPY long)")
     ap.add_argument("--max-changes", type=int, default=3, help="max replacements per week")
+    ap.add_argument("--max-shares", type=int, default=1000, help="broker limit of shares per stock")
     ap.add_argument("--build", type=int, default=None,
                     help="max new names into empty slots per week (default 4 the first week, then 3)")
     args = ap.parse_args()
@@ -392,7 +393,7 @@ def main():
     flags = mna_flags(cand.cik, (asof - timedelta(days=180)).date().isoformat())
     cand = cand.assign(fusiones_SEC=cand.cik.map(flags))
     target = cap_usd * args.gross / N_SHORT
-    cand["acciones"] = (target / cand.precio).round().clip(lower=1).astype(int)
+    cand["acciones"] = (target / cand.precio).round().clip(lower=1, upper=args.max_shares).astype(int)
     cand["nocional_usd"] = cand.acciones * cand.precio
     ok = (cand.precio <= 1.5 * target) & (cand.fusiones_SEC == "")
     book = cand[ok].head(N_SHORT)
@@ -447,12 +448,24 @@ def main():
         fh.write("## Órdenes\n\n| Acción | Símbolo MT5 | Acciones | Precio ref. | Nocional USD |\n|---|---|---:|---:|---:|\n")
         for t in out:
             fh.write(f"| Cerrar corto (comprar) | {t.replace('.', '')} | posición actual | | |\n")
+        def tickets(n):           # broker cap on shares per order
+            return [args.max_shares] * (n // args.max_shares) + ([n % args.max_shares] if n % args.max_shares else [])
         for t in new:
             r = cand.loc[t]
-            fh.write(f"| Abrir corto (vender) | {r.mt5} | {r.acciones} | {r.precio:.2f} | {r.nocional_usd:,.0f} |\n")
+            parts = tickets(int(r.acciones))
+            for i, q in enumerate(parts):
+                tag = f" (orden {i + 1}/{len(parts)})" if len(parts) > 1 else ""
+                fh.write(f"| Abrir corto (vender){tag} | {r.mt5} | {q} | {r.precio:.2f} | {q * r.precio:,.0f} |\n")
         if spy_trade:
-            fh.write(f"| Cobertura: {'comprar' if spy_trade > 0 else 'vender'} SPY | SPY | {abs(spy_trade)} | "
-                     f"{spy_px:.2f} | {abs(spy_trade) * spy_px:,.0f} |\n")
+            parts = tickets(abs(spy_trade))
+            for i, q in enumerate(parts):
+                tag = f" (orden {i + 1}/{len(parts)})" if len(parts) > 1 else ""
+                fh.write(f"| Cobertura: {'comprar' if spy_trade > 0 else 'vender'} SPY{tag} | SPY | {q} | "
+                         f"{spy_px:.2f} | {q * spy_px:,.0f} |\n")
+        capped = [t for t in new if cand.acciones[t] == args.max_shares and cand.precio[t] * args.max_shares < 0.95 * target]
+        if capped:
+            fh.write(f"\nLímite de {args.max_shares} acciones por valor: {', '.join(capped)} quedan por debajo del "
+                     f"objetivo de {target:,.0f} USD (la cobertura con SPY se ajusta al total real).\n")
         fh.write(f"\nTras las órdenes: {len(final)} cortos por {short_usd:,.0f} USD frente a {spy_n} SPY "
                  f"({spy_n * spy_px:,.0f} USD).")
         if len(final) < N_SHORT:
