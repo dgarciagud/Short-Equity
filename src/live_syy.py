@@ -338,7 +338,9 @@ def main():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--asof", default=str(date.today()))
-    ap.add_argument("--holdings", default=str(data.DATA / "live" / "holdings.csv"))
+    ap.add_argument("--account", choices=["zero", "classic"], default="zero")
+    ap.add_argument("--holdings", default=None, help="default data/live/holdings.csv (zero) "
+                                                     "or data/live/holdings_classic.csv")
     ap.add_argument("--capital", type=float, default=1900.0, help="account equity")
     ap.add_argument("--currency", choices=["EUR", "USD"], default="EUR")
     ap.add_argument("--gross", type=float, default=1.0, help="short notional / equity (same for the SPY long)")
@@ -349,6 +351,8 @@ def main():
     args = ap.parse_args()
     asof = pd.Timestamp(args.asof)
     stamp = asof.date().isoformat()
+    sfx = "" if args.account == "zero" else f"_{args.account}"
+    args.holdings = args.holdings or str(data.DATA / "live" / f"holdings{sfx}.csv")
     LIVE.mkdir(parents=True, exist_ok=True)
 
     dx = pd.read_csv(data.DATA / "darwinex" / "spread_history.csv")
@@ -434,12 +438,12 @@ def main():
     after = pd.DataFrame({"ticker": final + ["SPY"],
                           "shares": [int(cand.acciones[t]) if t in new else held_sh.get(t, np.nan)
                                      for t in final] + [spy_n]})
-    after.to_csv(LIVE / f"holdings_tras_ordenes_{stamp}.csv", index=False)
+    after.to_csv(LIVE / f"holdings_tras_ordenes{sfx}_{stamp}.csv", index=False)
 
     cols = ["mt5", "name", "sector", "M", "n_anomalias", "precio", "acciones", "nocional_usd",
             "avg_spread_bps", "ultimo_informe", "fusiones_SEC"]
-    with open(LIVE / f"syy_orders_{stamp}.md", "w") as fh:
-        fh.write(f"# Órdenes SYY semana del {stamp} — Darwinex Zero\n\n")
+    with open(LIVE / f"syy_orders{sfx}_{stamp}.md", "w") as fh:
+        fh.write(f"# Órdenes SYY semana del {stamp} — Darwinex {args.account.capitalize()}\n\n")
         fh.write(f"Capital {args.capital:,.0f} {args.currency} (= {cap_usd:,.0f} USD), "
                  f"corto bruto {args.gross:.1f}× ⇒ objetivo {target:,.0f} USD por valor. Precios de cierre "
                  f"{px.index[-1].date()}; momentum hasta {me.index[-2].date()}.\n\n")
@@ -471,8 +475,8 @@ def main():
         if len(final) < N_SHORT:
             fh.write(f" Cartera en construcción: faltan {N_SHORT - len(final)} cortos, que entrarán en las "
                      f"próximas semanas con el ranking de cada semana.")
-        fh.write(f"\n\nSi ejecutas todo tal cual, copia `results/live/holdings_tras_ordenes_{stamp}.csv` a "
-                 f"`data/live/holdings.csv` (pon las acciones reales si difieren).\n\n")
+        fh.write(f"\n\nSi ejecutas todo tal cual, copia `results/live/holdings_tras_ordenes{sfx}_{stamp}.csv` a "
+                 f"`{Path(args.holdings).relative_to(data.ROOT)}` (pon las acciones reales si difieren).\n\n")
         fh.write("## Cartera tras las órdenes\n\n")
         fh.write(df.reindex(final).assign(acciones=after.set_index("ticker").shares.reindex(final))
                  [[c for c in cols if c in df or c == "acciones"]].round(3).to_markdown() + "\n\n")
@@ -482,7 +486,7 @@ def main():
             fh.write(skipped[cols].round(3).to_markdown() + "\n\n")
         fh.write("## Siguientes en el ranking (suplentes y candidatos de las próximas semanas)\n\n")
         fh.write(cand[ok & ~cand.index.isin(final)].head(10)[cols].round(3).to_markdown() + "\n")
-    print(open(LIVE / f"syy_orders_{stamp}.md").read())
+    print(open(LIVE / f"syy_orders{sfx}_{stamp}.md").read())
 
 
 if __name__ == "__main__":
