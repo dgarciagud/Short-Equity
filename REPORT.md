@@ -474,6 +474,23 @@ Las 11 de Stambaugh-Yu-Yuan, todas calculadas con datos de la SEC fechados por s
 
 **Lectura.** Coincide con la literatura: el efecto de quiebra está muy concentrado en empresas pequeñas e ilíquidas y difíciles de cortar, y se debilitó tras 2008. Dentro del S&P 500, una empresa "en apuros" es grande, suele estar barata y ha rebotado (energía en 2016 y 2021, cíclicas en 2020-2021). **Recomendación: quedarse con las 8 anomalías (con NI corregida).** La quiebra solo serviría como filtro de riesgo (evitar cortos con riesgo de rebote violento), no como señal de corto.
 
+### 12.d ¿Qué predomina en la cartera y conviene ponderar por volatilidad? (`src/weighting_test.py`)
+
+La puntuación M promedia **percentiles**, no retornos, así que la volatilidad de cada anomalía no la domina directamente. Sí pueden predominar los bloques de anomalías correlacionadas y las acciones más volátiles. Backtest S&P 500 histórico 2012-2026, 10 cortos con máx. 3 por sector frente a SPY, neto Zero, con pesos estimados solo con datos pasados.
+
+**Volatilidad de cada anomalía** (quintil sobrevalorado frente a mercado EW, %/año): momentum 9,9 y ROA 7,4 son las más volátiles. Las demás están entre 3,4 y 4,9. Correlaciones: AG, NOA, DPI2A y NI forman un bloque de "inversión y financiación" (0,3-0,54 entre sí). Momentum y ROA se mueven juntas (0,65).
+
+**Qué domina la selección**: el percentil medio de los 10 cortos es NOA 93, NI 90, AG 90, DPI2A 89, PROF 83, ROA 75, momentum 70 y AC 62. **Predomina el bloque de inversión**, no las anomalías más volátiles. **En riesgo, predominan las acciones**: los 3 valores más volátiles aportan ~57 % de la varianza del libro corto.
+
+| Puntuación \ posiciones | %/mes | t | Sharpe | Vol. % | DD máx. | 2012-16 | 2017-21 | 2022-26 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Igual (actual) \ equiponderado** | **0,49** | 2,2 | **0,50** | 11,8 | −25 % | 0,63 | 0,10 | 0,75 |
+| Igual \ inversa de la volatilidad | 0,34 | 1,9 | 0,40 | 10,4 | −20 % | 0,34 | 0,14 | 0,56 |
+| Inversa vol. de cada anomalía \ equiponderado | 0,34 | 1,5 | 0,35 | 11,6 | −28 % | 0,33 | 0,06 | 0,65 |
+| Igual por bloque económico \ equiponderado | 0,47 | 1,6 | 0,42 | 13,6 | −33 % | 0,93 | −0,16 | 0,65 |
+
+**Lectura.** Ninguna ponderación mejora la regla actual en rentabilidad ajustada por riesgo. Ponderar las acciones por la inversa de su volatilidad baja la volatilidad un 12 % y el drawdown de −25 % a −20 %, pero recorta el retorno un 30 %. Es coherente con Stambaugh, Yu y Yuan (2015) y con el §10: la sobrevaloración se corrige sobre todo en las acciones **volátiles**, que son más difíciles de arbitrar, así que reducir su peso quita justo la parte que funciona. Ponderar las anomalías por su volatilidad quita peso a momentum y ROA y empeora. Dar el mismo peso a cada bloque económico sube el riesgo. Las diferencias no son estadísticamente significativas, así que la conclusión es **mantener la regla simple**. En Darwinex el DARWIN se reescala a su VaR objetivo de todos modos, así que lo que cuenta es el Sharpe.
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
