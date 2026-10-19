@@ -23,7 +23,9 @@ M = mean of the available percentiles (at least 5 of 8 required).
 Usage:
   SEC_USER_AGENT="Your Name your@email" python src/live_syy.py [--asof YYYY-MM-DD]
        [--holdings data/live/holdings.csv] [--capital 1900] [--gross 1.0]
-holdings.csv: one column `ticker` with the shorts currently open.
+holdings.csv: columns `ticker,shares` with the open shorts and the SPY hedge (row SPY).
+Weekly rule: up to --max-changes replacements; while the book has fewer than 10 shorts,
+up to --build new names (default 4 the first week, then 3), SPY resized to the short total.
 """
 import argparse
 import io
@@ -340,7 +342,9 @@ def main():
     ap.add_argument("--capital", type=float, default=1900.0, help="account equity")
     ap.add_argument("--currency", choices=["EUR", "USD"], default="EUR")
     ap.add_argument("--gross", type=float, default=1.0, help="short notional / equity (same for the SPY long)")
-    ap.add_argument("--max-changes", type=int, default=3)
+    ap.add_argument("--max-changes", type=int, default=3, help="max replacements per week")
+    ap.add_argument("--build", type=int, default=None,
+                    help="max new names into empty slots per week (default 4 the first week, then 3)")
     args = ap.parse_args()
     asof = pd.Timestamp(args.asof)
     stamp = asof.date().isoformat()
@@ -394,18 +398,42 @@ def main():
     book = cand[ok].head(N_SHORT)
     skipped = cand[~ok & (cand.M >= book.M.min())]
 
+    # Current book: holdings.csv with columns ticker[,shares]; the SPY row is the hedge.
     hold_path = Path(args.holdings)
-    holdings = pd.read_csv(hold_path).ticker.tolist() if hold_path.exists() else []
+    hold = pd.read_csv(hold_path) if hold_path.exists() else pd.DataFrame(columns=["ticker", "shares"])
+    if "shares" not in hold:
+        hold["shares"] = np.nan
+    hold["ticker"] = hold.ticker.astype(str).str.upper()
+    spy_held = hold.loc[hold.ticker == "SPY", "shares"].sum()
+    holdings = [t for t in hold.ticker if t != "SPY"]
     ranked = df.loc[[t for t in cand.index if ok[t]] + [t for t in df.index if t not in cand.index]]
     ranked = ranked.assign(rank_sobrevalorada=np.arange(1, len(ranked) + 1))
-    if holdings:
-        out, new = trade_list(ranked, holdings, max_changes=args.max_changes)
-    else:
-        out, new = [], list(book.index)
+    out, new = trade_list(ranked, holdings, max_changes=args.max_changes)
+    # Staggered build: replacements one-for-one, plus at most `build` names into empty slots.
+    build = args.build if args.build is not None else (4 if not holdings else args.max_changes)
+    empty = max(0, N_SHORT - len([h for h in holdings if h in df.index]))
+    new = new[: len(out) + min(empty, build)]
     final = [h for h in holdings if h not in out] + new
-    short_usd = cand.reindex(final).nocional_usd.sum()
+
+    price = df.precio
+    held_sh = hold.set_index("ticker").shares
+    def notional(t):
+        if t in new:
+            return cand.nocional_usd.get(t, target)
+        sh = held_sh.get(t, np.nan)
+        return sh * price.get(t, np.nan) if pd.notna(sh) else target
+    short_usd = sum(notional(t) for t in final)
     spy_px = px["SPY"].dropna().iloc[-1]
-    spy_n = max(1, round(short_usd / spy_px))
+    spy_n = int(round(short_usd / spy_px))
+    spy_trade = spy_n - (int(spy_held) if pd.notna(spy_held) else 0)
+    if new and new[0] not in cand.index:      # opened from outside the sized candidate list
+        cand = pd.concat([cand, df.loc[[t for t in new if t not in cand.index]]])
+        cand["acciones"] = cand.acciones.fillna((target / cand.precio).round()).astype(int)
+        cand["nocional_usd"] = cand.acciones * cand.precio
+    after = pd.DataFrame({"ticker": final + ["SPY"],
+                          "shares": [int(cand.acciones[t]) if t in new else held_sh.get(t, np.nan)
+                                     for t in final] + [spy_n]})
+    after.to_csv(LIVE / f"holdings_tras_ordenes_{stamp}.csv", index=False)
 
     cols = ["mt5", "name", "sector", "M", "n_anomalias", "precio", "acciones", "nocional_usd",
             "avg_spread_bps", "ultimo_informe", "fusiones_SEC"]
@@ -422,17 +450,25 @@ def main():
         for t in new:
             r = cand.loc[t]
             fh.write(f"| Abrir corto (vender) | {r.mt5} | {r.acciones} | {r.precio:.2f} | {r.nocional_usd:,.0f} |\n")
-        fh.write(f"| Cobertura: largo (comprar) | SPY | {spy_n} | {spy_px:.2f} | {spy_n * spy_px:,.0f} |\n\n")
-        fh.write(f"Corto total {short_usd:,.0f} USD frente a largo SPY {spy_n * spy_px:,.0f} USD "
-                 f"(ajustar la posición de SPY a esta cifra si ya existe).\n\n")
-        fh.write("## Cartera objetivo (10 cortos, máx. 3 por sector)\n\n")
-        fh.write(cand.loc[final, cols].round(3).to_markdown() + "\n\n")
+        if spy_trade:
+            fh.write(f"| Cobertura: {'comprar' if spy_trade > 0 else 'vender'} SPY | SPY | {abs(spy_trade)} | "
+                     f"{spy_px:.2f} | {abs(spy_trade) * spy_px:,.0f} |\n")
+        fh.write(f"\nTras las órdenes: {len(final)} cortos por {short_usd:,.0f} USD frente a {spy_n} SPY "
+                 f"({spy_n * spy_px:,.0f} USD).")
+        if len(final) < N_SHORT:
+            fh.write(f" Cartera en construcción: faltan {N_SHORT - len(final)} cortos, que entrarán en las "
+                     f"próximas semanas con el ranking de cada semana.")
+        fh.write(f"\n\nSi ejecutas todo tal cual, copia `results/live/holdings_tras_ordenes_{stamp}.csv` a "
+                 f"`data/live/holdings.csv` (pon las acciones reales si difieren).\n\n")
+        fh.write("## Cartera tras las órdenes\n\n")
+        fh.write(df.reindex(final).assign(acciones=after.set_index("ticker").shares.reindex(final))
+                 [[c for c in cols if c in df or c == "acciones"]].round(3).to_markdown() + "\n\n")
         if len(skipped):
             fh.write("## Descartados\n\nPrecio > 1,5× el objetivo por valor (1 acción pesa demasiado) o "
                      "presentación de fusión/OPA ante la SEC en los últimos 180 días:\n\n")
             fh.write(skipped[cols].round(3).to_markdown() + "\n\n")
-        fh.write("## Suplentes (siguientes en el ranking)\n\n")
-        fh.write(cand[ok].iloc[N_SHORT:N_SHORT + 10][cols].round(3).to_markdown() + "\n")
+        fh.write("## Siguientes en el ranking (suplentes y candidatos de las próximas semanas)\n\n")
+        fh.write(cand[ok & ~cand.index.isin(final)].head(10)[cols].round(3).to_markdown() + "\n")
     print(open(LIVE / f"syy_orders_{stamp}.md").read())
 
 
