@@ -491,6 +491,24 @@ La puntuación M promedia **percentiles**, no retornos, así que la volatilidad 
 
 **Lectura.** Ninguna ponderación mejora la regla actual en rentabilidad ajustada por riesgo. Ponderar las acciones por la inversa de su volatilidad baja la volatilidad un 12 % y el drawdown de −25 % a −20 %, pero recorta el retorno un 30 %. Es coherente con Stambaugh, Yu y Yuan (2015) y con el §10: la sobrevaloración se corrige sobre todo en las acciones **volátiles**, que son más difíciles de arbitrar, así que reducir su peso quita justo la parte que funciona. Ponderar las anomalías por su volatilidad quita peso a momentum y ROA y empeora. Dar el mismo peso a cada bloque económico sube el riesgo. Las diferencias no son estadísticamente significativas, así que la conclusión es **mantener la regla simple**. En Darwinex el DARWIN se reescala a su VaR objetivo de todos modos, así que lo que cuenta es el Sharpe.
 
+### 12.e Sharpe año a año, 2006-2026 (`src/yearly_sharpe.py`)
+
+Son dos backtests, ambos con 10 cortos cubiertos y netos de costes de Darwinex Zero, fechados por mes de tenencia:
+* **CRSP / Chen-Pelger-Zhu (2006-2016)**: top 500 por capitalización, sin límite sectorial (CPZ no tiene sectores), cubierto con el mercado equiponderado.
+* **SEC con composición histórica (2012-2026)**: la regla que se opera hoy, con límite de 3 por sector y cobertura con SPY.
+
+![Sharpe anual](figures/fig13_sharpe_anual.png)
+
+| Periodo | %/mes | Sharpe | Vol. % |
+|---|---:|---:|---:|
+| CRSP 2006-2016 | 0,48 | 0,47 | 12,2 |
+| SEC 2012-2026 | 0,50 | 0,50 | 11,8 |
+| Empalme (CRSP 2006-2011 + SEC 2012-2026) | 0,44 | 0,43 | 12,0 |
+
+* **15 de 21 años con Sharpe positivo**, aunque varios por poco. Años buenos: 2007-2008, 2012, 2015, 2024 y 2026 (hasta octubre). Años malos: 2006, 2016 (en CRSP), 2018-2019, 2021 y 2023, todos entre −4 % y −9 %.
+* **2018-2023 fue la racha floja de la regla actual**: seis años con Sharpe medio ~0, en un mercado liderado por grandes tecnológicas en el que lo "caro" siguió subiendo.
+* **Aviso sobre la precisión anual.** Un Sharpe con 12 meses es muy ruidoso: su error típico ronda ±1. En 2012-2016 los dos backtests coinciden en la media (0,72 y 0,69 %/mes), pero su correlación mensual es solo 0,11. Con solo 10 nombres, pequeñas diferencias de datos o de regla (sectores, cobertura) cambian mucho cada año concreto. El año a año sirve para ver rachas, no para juzgar la estrategia en un año.
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
