@@ -6,3 +6,4 @@ __pycache__/
 data/sec
 results/recent/*/panel.parquet
 data/jkp/*.parquet
+results/kelly/*panel.parquet
