@@ -3,5 +3,5 @@ data/*.parquet
 results/panels/
 results/returns/
 __pycache__/
-data/sec/
+data/sec
 results/recent/*/panel.parquet
