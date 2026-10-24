@@ -525,6 +525,8 @@ Son dos backtests, ambos con 10 cortos cubiertos y netos de costes de Darwinex Z
 
 ### Reproducir
 
+En un contenedor nuevo, `SEC_USER_AGENT="Nombre email" bash tools/setup_datos.sh` reconstruye todos los datos que no están en git (~490 MB): repositorio ML4T, Chen-Pelger-Zhu, precios y SEC. Detalle de cada paso:
+
 ```bash
 git clone --depth 1 https://github.com/stefan-jansen/machine-learning-for-trading external/machine-learning-for-trading
 pip install pandas numpy pyarrow statsmodels scikit-learn lightgbm matplotlib yfinance ml4t-data tabulate lxml
