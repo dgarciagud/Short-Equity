@@ -139,6 +139,63 @@ En esta muestra el momentum de factores **empeora** el resultado: los factores q
 
 **Por qué JKP ve más que nosotros: la ponderación por capitalización.** Con terciles ponderados por capitalización, nuestra reconstrucción da un Sharpe de 0,68 en Profitability, 0,63 en Quality y 0,31 en Profit Growth, cerca de lo que publica JKP. Equiponderados dan 0,09, −0,09 y −0,02. Combinando los 13 temas, la versión por capitalización llega a 0,30 frente a 0,01. Esa prima viene de las compañías más grandes (las tecnológicas rentables de 2012-2025). Una cartera de 25-50 valores con el mismo peso no la captura.
 
+## Todo ponderado por capitalización (`src/kelly_vw.py tope|puro`, `src/syy_vw.py`)
+
+Darwinex solo ofrece grandes compañías, así que se rehacen los estudios SEC 2012-2026 ponderando por capitalización. La base CRSP/Chen-Pelger-Zhu no trae la capitalización en dólares (LME es un rango), así que para la historia larga la versión ponderada son los factores oficiales de JKP (ya ponderados con tope; ver arriba). Dos variantes:
+* **con tope**: capitalización limitada al percentil 80 del S&P 500 cada mes, como JKP;
+* **pura**: capitalización sin límite.
+
+Terciles, como JKP.
+
+**Temas, Sharpe 2012-2026 (bruto):**
+
+| Tema | Iguales (v2, quintiles) | Cap. con tope | Cap. pura | JKP mega, mismo periodo |
+|---|---:|---:|---:|---:|
+| Accruals | 0,42* | 0,28 | −0,23 | 0,04 |
+| Debt Issuance | −0,28* | −0,18 | −0,55 | 0,45 |
+| Investment | 0,25* | 0,18 | 0,03 | 0,07 |
+| Low Leverage | −0,05* | 0,08 | 0,21 | 0,27 |
+| Low Risk | −0,27* | −0,23 | −0,07 | −0,10 |
+| Momentum | 0,13* | 0,08 | 0,23 | 0,32 |
+| Profit Growth | −0,02* | 0,07 | 0,31 | 0,40 |
+| Profitability | 0,09* | 0,11 | **0,68** | 0,35 |
+| Quality | −0,09* | 0,06 | **0,63** | 0,37 |
+| Seasonality | −0,26* | −0,16 | 0,04 | −0,13 |
+| Short-Term Reversal | −0,05* | −0,03 | −0,16 | −0,02 |
+| Size | 0,06* | −0,03 | 0,13 | −0,06 |
+| Value | 0,34* | 0,12 | 0,21 | 0,01 |
+
+\* Equiponderado con terciles.
+
+Correlación con los temas oficiales de mega caps: 0,6-0,9 con tope en 10 de 13 temas; menor en la versión pura.
+
+**Combinaciones y libros (neto Darwinex Zero):**
+
+| Cartera | Cap. con tope %/mes (Sharpe) | Cap. pura %/mes (Sharpe) | Peso máx. de un valor (pura) |
+|---|---:|---:|---:|
+| Factores, 55 indicadores, estático (bruto) | 0,02 (0,20) | 0,12 (0,46) | – |
+| Factores, solo ganadores 12m (bruto) | −0,01 (−0,05) | 0,13 (0,24) | – |
+| Factores, TSFM 12m (bruto) | −0,03 (−0,13) | 0,11 (0,23) | – |
+| Libro 50/50, indicadores estático | 0,01 (0,02) | **0,70 (0,46)** | 36 % |
+| Libro tercil, indicadores estático | 0,01 (0,01) | **0,50 (0,50)** | 23 % |
+| Libro tercil, solo ganadores | −0,11 (−0,14) | 0,12 (0,10) | 19 % |
+| Libro tercil, TSFM 12m | −0,28 (−0,31) | −0,07 (−0,05) | 18 % |
+
+Libro tercil de cap. pura por subperiodo: +1,17 %/mes (2013-16), +0,84 (2017-21), **−0,29 (2022-26)**.
+
+**Estrategia de cortos SYY ponderada por capitalización** (`syy_vw.py`, misma regla que la §12.b del informe principal):
+
+| Estrategia | Iguales | Cap. con tope | Cap. pura |
+|---|---:|---:|---:|
+| Quintil sobrevalorado vs mercado (bruto) | 0,25 %/mes, Sharpe **0,74** | 0,23, 0,63 | 0,24, 0,34 |
+| 10 cortos (máx. 3/sector) / SPY, neto Zero | 0,47 %/mes, Sharpe **0,48** | 0,34, 0,37 | 0,35, 0,32 |
+
+**Lectura.**
+1. **Con tope (lo que hace JKP), nada cambia:** los temas y libros siguen en ~0.
+2. **Sin tope aparece rentabilidad** (libro tercil +0,5 %/mes neto, Sharpe 0,5), pero viene casi entera de Profitability y Quality en las mayores compañías. Un solo valor llega a pesar 20-36 % de una pata, funciona en 2013-2021 (la subida de las grandes tecnológicas rentables) y **pierde en 2022-2026**. Es una apuesta concentrada en unas pocas mega caps, no una cartera de factores diversificada.
+3. **El momentum de factores tampoco ayuda ponderando por capitalización.**
+4. **En la estrategia de cortos SYY, ponderar por capitalización empeora el resultado** (Sharpe 0,48 → 0,32-0,37) y concentra el riesgo: un solo corto pesa de media un 23-33 % del libro. El efecto de sobrevaloración vive en las acciones medianas del índice, no en las gigantes. **Se mantiene la ponderación igual.**
+
 ## Conclusión
 
 1. **Históricamente, la combinación de las 13 familias es excelente en grandes compañías.** Sharpe de 1,1 bruto a nivel de factores y ~0,85 neto en un libro de 25/25, con beta de mercado ≈ −0,2.
@@ -148,4 +205,4 @@ En esta muestra el momentum de factores **empeora** el resultado: los factores q
    * reconstruir mejor los temas vivos en grandes compañías (Quality, Profitability, Profit Growth, Debt Issuance, Momentum, Low Leverage) y comprobar que su margen supera los costes;
    * buscar universos donde las anomalías sigan vivas, aunque Darwinex solo ofrece grandes compañías de EE. UU.
 
-Reproducir: `cd src && python kelly_cpz.py && python kelly_sec.py && python kelly_figures.py && python jkp_download.py && python kelly_jkp.py && python factor_momentum.py && python prices_close.py && python kelly_sec2.py`.
+Reproducir: `cd src && python kelly_cpz.py && python kelly_sec.py && python kelly_figures.py && python jkp_download.py && python kelly_jkp.py && python factor_momentum.py && python prices_close.py && python kelly_sec2.py && python kelly_vw.py tope && python kelly_vw.py puro && python syy_vw.py`.

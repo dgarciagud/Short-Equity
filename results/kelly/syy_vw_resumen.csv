@@ -1,0 +1,7 @@
+estrategia,ponderacion,%/mes,t,sharpe,max_dd_%,2012-2016,2017-2021,2022-2026,peso_max_medio_%
+"Quintil sobrevalorado vs mercado, bruto",igual,0.2505,2.8511,0.7449,-6.6768,0.2768,0.1528,0.3256,
+"10 cortos (máx. 3/sector) / SPY, neto Zero",igual,0.4676,2.2172,0.4797,-20.7026,0.5727,0.1148,0.7285,10.0000
+"Quintil sobrevalorado vs mercado, bruto",capitalización con tope,0.2296,2.4050,0.6255,-10.0139,0.2196,0.1872,0.2847,
+"10 cortos (máx. 3/sector) / SPY, neto Zero",capitalización con tope,0.3412,1.7545,0.3690,-21.5318,0.6531,0.2562,0.1022,23.2529
+"Quintil sobrevalorado vs mercado, bruto",capitalización pura,0.2422,1.2737,0.3386,-16.4467,0.2560,0.2426,0.2273,
+"10 cortos (máx. 3/sector) / SPY, neto Zero",capitalización pura,0.3514,1.3887,0.3245,-27.1689,1.0132,0.2314,-0.2189,32.7216
