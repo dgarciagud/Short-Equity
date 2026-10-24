@@ -51,12 +51,13 @@ CF_COLS = {"assets": "assets", "liabilities": "liabilities",
            "net_income": "netincomeloss", "cfo": "netcashprovidedbyusedinoperatingactivities",
            "gross_profit": "grossprofit", "revenue": "revenues", "cogs": "costofrevenue",
            "shares": "weightedaveragenumberofdilutedsharesoutstanding",
-           "cur_assets": "assetscurrent", "cur_liab": "liabilitiescurrent", "public_float": "public_float"}
+           "cur_assets": "assetscurrent", "cur_liab": "liabilitiescurrent", "public_float": "public_float",
+           "op_income": "operatingincomeloss"}
 CF_PANELS = {"instant": (None, ["assets", "liabilities", "liab_equity", "equity", "cash", "st_invest",
                                 "lt_debt", "st_debt", "ppe", "inventory", "cur_assets", "cur_liab"]),
              "float": (None, ["public_float"]),
-             "quarterly": ((80, 100), ["net_income"]), "shares": ((80, 100), ["shares"]),
-             "annual": ((350, 380), ["net_income", "cfo", "gross_profit", "revenue", "cogs"])}
+             "quarterly": ((80, 100), ["net_income", "op_income"]), "shares": ((80, 100), ["shares"]),
+             "annual": ((350, 380), ["net_income", "cfo", "gross_profit", "revenue", "cogs", "op_income"])}
 _CF = {}
 SPLIT_SAFE_NI = True   # NI from same-filing comparatives (False reproduces the split-contaminated version)
 EXTRA = False          # also build O-score / CHS inputs (pit_backtest.py)

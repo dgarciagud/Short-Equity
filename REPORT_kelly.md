@@ -79,13 +79,73 @@ Rotación del libro: 45-63 % al mes (Short-Term Reversal y Seasonality cambian c
 2. **El rendimiento absoluto es muy pequeño.** La combinación oficial en mega caps rinde ~0,06 %/mes bruto (~0,7 %/año) con una volatilidad de ~1,4 %/año. El Sharpe sale de diversificar 153 factores, no de un margen grande. Cualquier implementación con CFD (spread de 8 pb por lado y rotación de decenas de valores) cuesta más que eso, y en Darwinex Zero no hay apalancamiento para escalarla.
 3. **Para implementar habría que concentrarse en los temas vivos en grandes compañías** (Quality, Profitability, Profit Growth, Debt Issuance, Momentum y Low Leverage), reconstruirlos con más fidelidad (más indicadores por tema, datos trimestrales de la SEC) y con baja rotación. Habría que comprobar antes que, con un libro concentrado, el margen supere los costes.
 
+## Reconstrucción ampliada (≈55 indicadores) y ponderación por momentum de factores (Gupta y Kelly, 2019)
+
+`src/factor_momentum.py` (factores oficiales de JKP) y `src/kelly_sec2.py` (SEC, S&P 500 histórico 2012-2026).
+
+**Esquemas de ponderación entre factores**, con información disponible en *t* y Σ|w| = 1:
+* **estático**: 1/σ;
+* **TSFM 12m**: signo del retorno de los 12 meses anteriores / σ (especificación principal de Gupta y Kelly);
+* **TSFM 1m**: signo del retorno del último mes / σ;
+* **solo ganadores**: factores con retorno positivo a 12 meses, sin ponerse nunca corto en un factor;
+* **XSFM**: por encima o por debajo de la mediana de los factores.
+
+**1. Factores oficiales JKP, mega caps (153 factores), Sharpe bruto:**
+
+| Esquema | 1967-89 | 1990-2006 | 2007-16 | 2017-25 | 1967-2025 | %/mes 1967-2025 |
+|---|---:|---:|---:|---:|---:|---:|
+| Estático | 1,38 | 0,84 | 0,78 | 0,35 | **0,91** | 0,15 |
+| TSFM 12m | 0,59 | 0,50 | 0,38 | 0,30 | 0,47 | 0,14 |
+| TSFM 1m | 1,07 | 0,32 | 0,42 | 0,31 | 0,52 | 0,16 |
+| Solo ganadores 12m | 1,10 | 0,93 | 0,73 | 0,36 | 0,86 | **0,24** |
+| XSFM 12m | 0,47 | 0,37 | 0,32 | 0,34 | 0,38 | 0,11 |
+
+El momentum de factores **no mejora el Sharpe** de la combinación estática. Ponerse corto en los factores perdedores resta diversificación, porque casi todos tienen prima positiva a largo plazo. La variante **"solo ganadores"** mantiene el Sharpe y **sube la rentabilidad por unidad de exposición ~60 %**. En large caps es la mejor: 0,94 frente a 0,89, y 0,60 frente a 0,53 en 2012-2025.
+
+**2. Reconstrucción SEC con 2-9 indicadores por tema:**
+* Accruals: AC, AC/NI, ΔWC.
+* Debt Issuance: Δdeuda, crecimiento de la deuda a 3 años, Δpasivo no corriente.
+* Investment: AG, NOA, DPI2A, emisión de acciones a 1 y 3 años, crecimiento de inventario, PP&E, ventas y activo corriente.
+* Low Leverage: L/A, A/BE, deuda/ME, deuda neta/ME, caja/A.
+* Low Risk: beta a 252 días y a 60 meses, vol. idiosincrática, vol. total, máximo diario.
+* Momentum: 12-1, 6-1, 9-1 y residual.
+* Profit Growth: SUE, ΔROA, ΔROE, Δmargen, ΔCFO/A, trimestres seguidos de crecimiento del beneficio.
+* Profitability: GP/A, ROE, beneficio operativo/BE, beneficio operativo/A, CFO/A.
+* Quality: ROA, rotación del activo, margen bruto, F-score de Piotroski, O-score, variabilidad del beneficio.
+* Seasonality: mismo mes del año anterior y de los años 2-5, ahora alineado con el mes de tenencia (la versión anterior tenía un mes de desfase).
+* Short-Term Reversal: mes, semana, media de los 5 máximos diarios.
+* Size: ME, log activos.
+* Value: B/M, E/P, CF/P, S/P, A/ME, EBIT/EV.
+
+La capitalización se calcula como acciones diluidas (cifra re-expresada en la última presentación) × cierre ajustado solo por *splits* (`src/prices_close.py`, yfinance `auto_adjust=False`). Cubre ~93 % de los casos, frente al 55 % con el *public float*.
+
+**La fidelidad mejora mucho.** Correlación mensual con los temas oficiales de mega caps (v1 → v2): Investment 0,53 → 0,75, Low Leverage 0,43 → 0,75, Momentum 0,69 → 0,86, Profit Growth 0,57 → 0,71, Value 0,76 → 0,82, Quality 0,90 → 0,83. La de la combinación de los 13 es 0,64 → 0,66.
+
+**Pero el rendimiento en el S&P 500 equiponderado no aparece** (2013-2026, quintiles, bruto salvo los libros):
+
+| Cartera | %/mes | Sharpe |
+|---|---:|---:|
+| Factores: 55 indicadores, estático | 0,03 | 0,20 |
+| Factores: TSFM 12m | −0,04 | −0,15 |
+| Factores: solo ganadores 12m | 0,01 | 0,02 |
+| Libro 25/25 (puntuación estática), neto Zero | 0,11 | 0,11 |
+| Libro 50/50 (puntuación estática), neto Zero | −0,02 | −0,03 |
+| Libro 25/25 solo ganadores, neto Zero | −0,35 | −0,25 |
+| Libro 25/25 TSFM 12m, neto Zero | −0,66 | −0,40 |
+
+En esta muestra el momentum de factores **empeora** el resultado: los factores que venían de un buen año (por ejemplo baja volatilidad en 2020-21, o *value* en 2022) se dieron la vuelta.
+
+**Indicadores individuales con mejor Sharpe, equiponderados:** NOA 0,64, S/P 0,53, CF/P 0,43, caja/A 0,42, ΔWC 0,37, emisión de acciones 0,36, A/ME 0,36. Con ~55 pruebas, alguno saldrá por azar.
+
+**Por qué JKP ve más que nosotros: la ponderación por capitalización.** Con terciles ponderados por capitalización, nuestra reconstrucción da un Sharpe de 0,68 en Profitability, 0,63 en Quality y 0,31 en Profit Growth, cerca de lo que publica JKP. Equiponderados dan 0,09, −0,09 y −0,02. Combinando los 13 temas, la versión por capitalización llega a 0,30 frente a 0,01. Esa prima viene de las compañías más grandes (las tecnológicas rentables de 2012-2025). Una cartera de 25-50 valores con el mismo peso no la captura.
+
 ## Conclusión
 
 1. **Históricamente, la combinación de las 13 familias es excelente en grandes compañías.** Sharpe de 1,1 bruto a nivel de factores y ~0,85 neto en un libro de 25/25, con beta de mercado ≈ −0,2.
 2. **Con nuestra reconstrucción, el efecto desaparece a partir de ~2007** (CRSP 2007-2016 y SEC 2012-2026): Sharpe ≈ 0 bruto y negativo tras costes. **Con los factores oficiales de JKP no desaparece del todo:** en mega caps, Sharpe ~0,5 en 2012-2025, pero con solo ~0,06 %/mes bruto. Parte de la diferencia viene de nuestras aproximaciones de Debt Issuance, Profit Growth y Low Leverage.
-3. **Tal como está, no es implementable con rentabilidad en Darwinex.** Antes de llevarlo a real habría que:
+3. **Ni con ~55 indicadores ni ponderando por momentum de factores aparece un margen implementable** en el S&P 500 con libros equiponderados (§ anterior). Lo único que sobrevive en grandes compañías es Profitability/Quality **ponderados por capitalización**, una apuesta muy concentrada en las mayores empresas. Opciones si se quiere seguir:
    * reducir la rotación (rebalanceo trimestral, quitar Short-Term Reversal y Seasonality o pasarlas a señales lentas);
    * reconstruir mejor los temas vivos en grandes compañías (Quality, Profitability, Profit Growth, Debt Issuance, Momentum, Low Leverage) y comprobar que su margen supera los costes;
    * buscar universos donde las anomalías sigan vivas, aunque Darwinex solo ofrece grandes compañías de EE. UU.
 
-Reproducir: `cd src && python kelly_cpz.py && python kelly_sec.py && python kelly_figures.py && python jkp_download.py && python kelly_jkp.py`.
+Reproducir: `cd src && python kelly_cpz.py && python kelly_sec.py && python kelly_figures.py && python jkp_download.py && python kelly_jkp.py && python factor_momentum.py && python prices_close.py && python kelly_sec2.py`.

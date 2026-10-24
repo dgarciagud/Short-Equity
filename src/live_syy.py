@@ -73,6 +73,7 @@ CONCEPTS = {
     "cur_assets": ["AssetsCurrent"],
     "cur_liab": ["LiabilitiesCurrent"],
     "public_float": ["dei:EntityPublicFloat"],      # cover page of the 10-K, as of the last Q2 end
+    "op_income": ["OperatingIncomeLoss"],
 }
 FLOW = {"net_income", "cfo", "gross_profit", "revenue", "cogs", "shares"}
 
