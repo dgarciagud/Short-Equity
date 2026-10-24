@@ -170,7 +170,8 @@ def feature_tables(base=FRAMES):
     rev = first(an, ["revenues", "revenuefromcontractwithcustomerexcludingassessedtax"])
     cost = first(an, ["costofrevenue", "costofgoodsandservicessold"])
     an["gp"] = first(an, ["grossprofit"]).fillna(rev - cost)
-    an = an[["cik", "q", "ann", "ni", "cfo", "gp"]].merge(assets, on=["cik", "q"], how="left")
+    an["rev"] = rev
+    an = an[["cik", "q", "ann", "ni", "cfo", "gp", "rev"]].merge(assets, on=["cik", "q"], how="left")
     an = an.merge(assets.assign(q=assets.q + 4).rename(columns={"A": "A_1"}), on=["cik", "q"], how="left")
     an["AC"] = (an.ni - an.cfo) / an[["A", "A_1"]].mean(axis=1)
     an["PROF"] = an.gp / an.A
