@@ -5,3 +5,4 @@ results/returns/
 __pycache__/
 data/sec
 results/recent/*/panel.parquet
+data/jkp/*.parquet
