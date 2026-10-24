@@ -149,7 +149,7 @@ Terciles, como JKP.
 
 **Temas, Sharpe 2012-2026 (bruto):**
 
-| Tema | Iguales (v2, quintiles) | Cap. con tope | Cap. pura | JKP mega, mismo periodo |
+| Tema | Iguales* | Cap. con tope | Cap. pura | JKP mega, mismo periodo |
 |---|---:|---:|---:|---:|
 | Accruals | 0,42* | 0,28 | −0,23 | 0,04 |
 | Debt Issuance | −0,28* | −0,18 | −0,55 | 0,45 |
