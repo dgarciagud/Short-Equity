@@ -509,6 +509,21 @@ Son dos backtests, ambos con 10 cortos cubiertos y netos de costes de Darwinex Z
 * **2018-2023 fue la racha floja de la regla actual**: seis años con Sharpe medio ~0, en un mercado liderado por grandes tecnológicas en el que lo "caro" siguió subiendo.
 * **Aviso sobre la precisión anual.** Un Sharpe con 12 meses es muy ruidoso: su error típico ronda ±1. En 2012-2016 los dos backtests coinciden en la media (0,72 y 0,69 %/mes), pero su correlación mensual es solo 0,11. Con solo 10 nombres, pequeñas diferencias de datos o de regla (sectores, cobertura) cambian mucho cada año concreto. El año a año sirve para ver rachas, no para juzgar la estrategia en un año.
 
+### 12.f Tamaño de las posiciones por contribución al riesgo (`src/risk_weights.py`)
+
+**Objetivo:** que ningún corto domine el riesgo del libro, teniendo en cuenta volatilidades y correlaciones. Como cada corto se cubre dólar a dólar con SPY, el riesgo relevante es el de los rendimientos **ajustados por mercado** (r_i − r_SPY). La covarianza se estima con 126 sesiones y *shrinkage* de Ledoit-Wolf. **ERC** (igual contribución al riesgo; Maillard, Roncalli y Teiletche, 2010) hace que los 10 cortos aporten lo mismo a la varianza de la cartera cubierta.
+
+| Esquema | %/mes neto Zero | t | Sharpe | Vol. % | DD máx. | Riesgo del valor que más aporta | Apuestas efectivas (de 10) | Peso máx. / mín. |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Igual (actual)** | **0,50** | 2,2 | **0,50** | 11,8 | −25 % | 21 % | 7,8 | 10 / 10 % |
+| Inversa de la volatilidad | 0,40 | 2,0 | 0,44 | 10,8 | −23 % | 14 % | 9,2 | 13 / 6 % |
+| ERC | 0,38 | 1,9 | 0,43 | 10,7 | −25 % | 10 % | 10,0 | 14 / 6 % |
+| ERC con límites 4-20 % | 0,38 | 1,9 | 0,43 | 10,7 | −24 % | 10 % | 10,0 | 14 / 6 % |
+| Mezcla 50 % igual / 50 % ERC | 0,44 | 2,1 | 0,47 | 11,2 | −25 % | 16 % | 9,1 | 12 / 8 % |
+| Tope de riesgo 15 % por valor | 0,43 | 1,9 | 0,44 | 11,7 | −22 % | 15 % | 9,0 | 10 / 8 % |
+
+**Lectura.** ERC cumple su función: con pesos iguales, el valor más arriesgado aporta de media el 21 % del riesgo; con ERC, el 10 %, y el libro pasa de 7,8 a 10 apuestas efectivas. Pero cuesta rentabilidad: −0,12 %/mes, Sharpe de 0,50 a 0,43. Es lo mismo que en el §12.d: la sobrevaloración se corrige sobre todo en los valores más volátiles, que son los que ERC recorta. La mezcla 50/50 es el término medio: la mayor aportación de un valor baja del 21 % al 16 % perdiendo solo 0,06 %/mes. Las diferencias de rentabilidad no son estadísticamente significativas.
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
