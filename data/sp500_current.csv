@@ -378,20 +378,19 @@ PEG,Public Service Enterprise Group,Utilities,788784
 PTC,PTC Inc.,Information Technology,857005
 PSA,Public Storage,Real Estate,1393311
 PHM,PulteGroup,Consumer Discretionary,822416
-PWR,Quanta Services,Industrials,1050915
-QCOM,Qualcomm,Information Technology,804328
-DGX,Quest Diagnostics,Health Care,1022079
 Q,Qnity Electronics,Information Technology,2058873
+QCOM,Qualcomm,Information Technology,804328
+PWR,Quanta Services,Industrials,1050915
+DGX,Quest Diagnostics,Health Care,1022079
 RL,Ralph Lauren Corporation,Consumer Discretionary,1037038
 RJF,Raymond James Financial,Financials,720005
 RDDT,Reddit,Communication Services,1713445
-RTX,RTX Corporation,Industrials,101829
 O,Realty Income,Real Estate,726728
 REG,Regency Centers,Real Estate,910606
 REGN,Regeneron Pharmaceuticals,Health Care,872589
 RF,Regions Financial Corporation,Financials,1281761
 RSG,Republic Services,Industrials,1060391
-RMD,ResMed|,Health Care,943819
+RMD,ResMed,Health Care,943819
 RVTY,Revvity,Health Care,31791
 HOOD,Robinhood Markets,Financials,1783879
 ROK,Rockwell Automation,Industrials,1024478
@@ -399,6 +398,7 @@ ROL,"Rollins, Inc.",Industrials,84839
 ROP,Roper Technologies,Information Technology,882835
 ROST,Ross Stores,Consumer Discretionary,745732
 RCL,Royal Caribbean Group,Consumer Discretionary,884887
+RTX,RTX Corporation,Industrials,101829
 SPGI,S&P Global,Financials,64040
 CRM,Salesforce,Information Technology,1108524
 SNDK,Sandisk,Information Technology,2023554
@@ -409,7 +409,7 @@ SRE,Sempra,Utilities,1032208
 NOW,ServiceNow,Information Technology,1373715
 SHW,Sherwin-Williams,Materials,89800
 SPG,Simon Property Group,Real Estate,1063761
-SKYD,Skydance Corporation,Communication Services,2041610
+SKYD,Skydance,Communication Services,2041610
 SWKS,Skyworks Solutions,Information Technology,4127
 SJM,J.M. Smucker Company (The),Consumer Staples,91419
 SW,Smurfit Westrock,Materials,2005951

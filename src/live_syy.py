@@ -329,6 +329,37 @@ def mna_flags(ciks, since):
     return out
 
 
+def risk_table(px, names, notional, cap):
+    """Share of the hedged book's variance from each short (market-adjusted daily returns,
+    126 sessions, Ledoit-Wolf); names above `cap` are flagged (REPORT 12.f)."""
+    from sklearn.covariance import LedoitWolf
+    d = px[[n for n in names if n in px] + ["SPY"]].pct_change(fill_method=None).iloc[-126:]
+    x = d.drop(columns="SPY").sub(d.SPY, axis=0)
+    x = x.loc[:, x.notna().sum() >= 60]
+    if x.shape[1] < 2:
+        return "Sin historia suficiente para estimar el riesgo."
+    S = LedoitWolf().fit(x.fillna(0).values).covariance_
+    w = np.array([notional[n] for n in x.columns])
+    w = w / w.sum()
+    rc = w * (S @ w)
+    rs = rc / rc.sum()
+    corr = np.corrcoef(x.fillna(0).values.T)
+    rows = []
+    for i, n in enumerate(x.columns):
+        top = max(((corr[i, j], x.columns[j]) for j in range(len(w)) if j != i), default=(np.nan, ""))
+        rows.append({"valor": n, "peso_%": 100 * w[i], "vol_vs_mercado_%": 100 * np.sqrt(S[i, i] * 252),
+                     "riesgo_%": 100 * rs[i], "más correlacionado": f"{top[1]} ({top[0]:.2f})",
+                     "aviso": f"⚠ > {100 * cap:.0f} %" if rs[i] > cap else ""})
+    t = pd.DataFrame(rows).set_index("valor")
+    vol = np.sqrt(w @ S @ w * 252)
+    flagged = t[t.aviso != ""].index.tolist()
+    msg = (f"Volatilidad estimada del libro cubierto: {100 * vol:.1f} % anual (por unidad de corto). "
+           + (f"**Aviso: {', '.join(flagged)} aporta(n) más del {100 * cap:.0f} % del riesgo.** Valora reducir "
+              f"su tamaño o esperar a que la cartera tenga más nombres." if flagged else
+              f"Ningún valor supera el {100 * cap:.0f} % del riesgo."))
+    return t.round(1).to_markdown() + "\n\n" + msg
+
+
 def main():
     """Weekly order list with the SAME pipeline as the point-in-time backtest (pit_backtest.py):
     companyfacts as-filed fundamentals, split-safe NI, today's S&P 500 members that Darwinex
@@ -346,6 +377,7 @@ def main():
     ap.add_argument("--gross", type=float, default=1.0, help="short notional / equity (same for the SPY long)")
     ap.add_argument("--max-changes", type=int, default=3, help="max replacements per week")
     ap.add_argument("--max-shares", type=int, default=1000, help="broker limit of shares per stock")
+    ap.add_argument("--risk-cap", type=float, default=0.25, help="warn when a short exceeds this share of risk")
     ap.add_argument("--build", type=int, default=None,
                     help="max new names into empty slots per week (default 4 the first week, then 3)")
     args = ap.parse_args()
@@ -477,6 +509,8 @@ def main():
                      f"próximas semanas con el ranking de cada semana.")
         fh.write(f"\n\nSi ejecutas todo tal cual, copia `results/live/holdings_tras_ordenes{sfx}_{stamp}.csv` a "
                  f"`{Path(args.holdings).relative_to(data.ROOT)}` (pon las acciones reales si difieren).\n\n")
+        fh.write("## Riesgo por valor (aviso, no modifica las órdenes)\n\n")
+        fh.write(risk_table(px, final, {t: notional(t) for t in final}, args.risk_cap) + "\n\n")
         fh.write("## Cartera tras las órdenes\n\n")
         fh.write(df.reindex(final).assign(acciones=after.set_index("ticker").shares.reindex(final))
                  [[c for c in cols if c in df or c == "acciones"]].round(3).to_markdown() + "\n\n")
