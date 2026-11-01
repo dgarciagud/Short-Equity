@@ -4,6 +4,8 @@ Same book as pit_backtest.py / the live rule: each month-end the 10 most overpri
 members (max 3 per sector), equal weight, held one month, Darwinex Zero costs.
 Hedges (long leg, dollar for dollar with the shorts):
   SPY            current rule
+  RSP            S&P 500 equal weight (Darwinex CFD; spread not in the MT5 export, 3 bp assumed)
+  50 % SPY / RSP half each
   sector ETF     each short hedged with its sector SPDR (XLC from 2018-07, XLRE from 2015-11;
                  before that, and for unknown sectors, SPY)
   50/50          half SPY, half sector ETF
@@ -28,7 +30,7 @@ OUT = data.ROOT / "results" / "recent" / "cobertura_sectorial"
 ETF = {"Utilities": "XLU", "Consumer Staples": "XLP", "Health Care": "XLV", "Industrials": "XLI",
        "Materials": "XLB", "Financials": "XLF", "Consumer Discretionary": "XLY",
        "Information Technology": "XLK", "Energy": "XLE", "Real Estate": "XLRE", "Communication Services": "XLC"}
-DIV_YIELD = {"SPY": 1.3, "XLU": 3.0, "XLP": 2.6, "XLV": 1.6, "XLI": 1.5, "XLB": 1.9, "XLF": 1.6, "XLY": 0.8,
+DIV_YIELD = {"SPY": 1.3, "RSP": 1.6, "XLU": 3.0, "XLP": 2.6, "XLV": 1.6, "XLI": 1.5, "XLB": 1.9, "XLF": 1.6, "XLY": 0.8,
              "XLK": 0.7, "XLE": 3.3, "XLRE": 3.3, "XLC": 0.9}
 START = {"XLC": "2018-07-31", "XLRE": "2015-11-30"}
 
@@ -39,7 +41,7 @@ def main():
     uni = universe().drop_duplicates("cik")
     spr = (uni.set_index("cik").avg_spread_bps / 2 / 1e4).to_dict()
     dx = pd.read_csv(data.DATA / "darwinex" / "spread_history.csv").set_index("symbol")
-    tick = sorted(set(ETF.values()) | {"SPY"})
+    tick = sorted(set(ETF.values()) | {"SPY", "RSP"})
     px = yf.download(tick, start="2010-01-01", auto_adjust=True, progress=False)["Close"]
     me = px.resample("ME").last()
     fwd = me.pct_change(fill_method=None).shift(-1)               # return of t+1, dated t
@@ -56,7 +58,8 @@ def main():
         e = ETF.get(sector, "SPY")
         return e if (e not in START or t >= pd.Timestamp(START[e])) and e in fwd and pd.notna(fwd.at[t, e]) else "SPY"
 
-    schemes = ["SPY", "ETF sectorial", "50 % SPY / 50 % sectorial", "sectorial por beta"]
+    schemes = ["SPY", "RSP (S&P 500 equiponderado)", "50 % SPY / 50 % RSP", "ETF sectorial",
+               "50 % SPY / 50 % sectorial", "sectorial por beta"]
     prev_s, prev_h = pd.Series(dtype=float), {k: pd.Series(dtype=float) for k in schemes}
     rows = []
     for t, g in pan.groupby("date"):
@@ -85,6 +88,10 @@ def main():
         for k in schemes:
             if k == "SPY":
                 hw = pd.Series({"SPY": 1.0})
+            elif k.startswith("RSP"):
+                hw = pd.Series({"RSP": 1.0})
+            elif k == "50 % SPY / 50 % RSP":
+                hw = pd.Series({"SPY": 0.5, "RSP": 0.5})
             elif k == "ETF sectorial":
                 hw = pd.Series(0.1, index=etfs).groupby(level=0).sum()
             elif k.startswith("50"):
@@ -123,6 +130,9 @@ def main():
     bet = (r["SPY"] - r["ETF sectorial"])
     pd.set_option("display.width", 250)
     print(res.round(2).to_string(index=False))
+    tilt = r["SPY"] - r["RSP (S&P 500 equiponderado)"]
+    print(f"\nInclinación capitalización vs equiponderado (cob. SPY − cob. RSP): {100 * tilt.mean():.2f} %/mes, "
+          f"t {rb.stats(tilt)['t']:.2f}")
     print(f"\nApuesta sectorial implícita (cobertura SPY − cobertura sectorial): {100 * bet.mean():.2f} %/mes, "
           f"t {rb.stats(bet)['t']:.2f}, vol {100 * bet.std() * np.sqrt(12):.1f} %; "
           f"corr. con la estrategia sectorial {bet.corr(r['ETF sectorial']):.2f}")

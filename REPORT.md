@@ -537,7 +537,16 @@ Darwinex ofrece CFD de los ETF sectoriales (XLU, XLV, XLB, XLF, XLI, XLP, XLY, X
 
 **La cobertura con SPY lleva una apuesta sectorial implícita que gana dinero:** quedarse corto de los sectores de los 10 cortos frente al S&P 500 aporta +0,28 %/mes (t = 2,2; vol. 6,4 %). Es más de la mitad del resultado. Esa apuesta se explica en un 51 % por **"S&P 500 ponderado por capitalización frente al S&P 500 equiponderado"** (RSP − SPY: coeficiente −0,67, t = −6) y por tecnología frente al índice (XLK − SPY: +0,12, t = 3). Descontadas ambas, quedan 0,12 %/mes (t = 1,2). Es decir: en 2012-2026 la estrategia ganó en parte porque las grandes tecnológicas batieron a la acción media del índice. Es una tendencia de este periodo, no una ley, y es lo que costó dinero en las dos primeras semanas en real.
 
-**Lectura.** Cubrir con el ETF sectorial reduce poco el riesgo (vol. 11,8 → 9,8 %) y no mejora el peor drawdown, pero se lleva la mitad de la rentabilidad. **Se mantiene la cobertura con SPY**, sabiendo que incluye una inclinación hacia las mega caps frente a la acción media. Si se quisiera reducir esa inclinación, el término medio 50/50 conserva un Sharpe de 0,41. Darwinex no ofrece el S&P 500 equiponderado (RSP), que sería la cobertura más limpia.
+**Cobertura con el S&P 500 equiponderado (RSP, disponible como CFD en Darwinex; spread supuesto de 3 pb):**
+
+| Cobertura | %/mes | t | Sharpe | Vol. % | DD máx. | 2012-16 | 2017-21 | 2022-26 | Alfa FF6 (t) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| RSP | 0,35 | 1,8 | 0,43 | 9,8 | **−19 %** | 0,66 | −0,04 | 0,44 | 0,32 (1,7) |
+| 50 % SPY / 50 % RSP | 0,42 | 2,1 | 0,48 | 10,5 | −21 % | 0,65 | 0,04 | 0,58 | 0,36 (1,9) |
+
+La diferencia SPY − RSP (la inclinación hacia las mega caps) aporta 0,14 %/mes, con t = 1,3 (no significativa).
+
+**Lectura.** Cubrir con el ETF de cada sector reduce poco el riesgo y se lleva la mitad de la rentabilidad. **RSP es la cobertura más limpia**: quita la apuesta "mega caps frente a la acción media", conserva la mayor parte de la rentabilidad y reduce el peor drawdown de −25 % a −19 %. El término medio **50 % SPY / 50 % RSP** mantiene casi el mismo Sharpe que SPY (0,48 frente a 0,50) con un drawdown de −21 %.
 
 ---
 
