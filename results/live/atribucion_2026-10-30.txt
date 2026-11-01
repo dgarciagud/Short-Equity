@@ -1,0 +1,62 @@
+== P&L por sector (USD)
+                      pnl  mov_ETF_sector  especifico_vs_sector
+sector_gics                                                   
+Financials       -7935.0          -488.0               -7448.0
+Cobertura (SPY)  -3851.0         -2404.0               -1447.0
+Materials        -2883.0         -1242.0               -1640.0
+Health Care      -2877.0         -2192.0                -685.0
+Consumer Staples -1460.0          -734.0                -726.0
+Industrials      -1083.0          -747.0                -336.0
+Utilities           44.0         -2559.0                2603.0
+
+== P&L por factor (USD)
+ mercado                 -381.0
+sector                 -8072.0
+tamaño                 -1623.0
+value                   1658.0
+momentum                -313.0
+calidad                  -77.0
+baja vol.               -174.0
+especifico_factores   -11062.0 
+ total -20046
+
+== Por valor (USD)
+            pnl  mercado  sector  tamaño   value  momentum  calidad  baja vol.  especifico_factores
+ticker                                                                                            
+GPN    -7935.0    283.0  -908.0  -135.0   231.0    -239.0    -41.0      -24.0              -7102.0
+SPY    -3851.0  -2404.0     0.0     0.0     0.0       0.0      0.0        0.0              -1447.0
+MLM    -2883.0    240.0 -1477.0   -17.0   -23.0     -13.0      0.0       -1.0              -1592.0
+WAT    -2877.0    455.0 -1737.0  -144.0   -50.0      54.0      0.0        2.0              -1457.0
+XEL    -2230.0      7.0 -1390.0   -30.0   -73.0     -11.0      0.0      -32.0               -703.0
+KDP    -1460.0     19.0  -756.0    -4.0    -6.0      15.0      0.0       -4.0               -726.0
+AXON   -1083.0    435.0   197.0  -971.0  1506.0    -448.0    -36.0     -328.0              -1438.0
+NRG     2274.0    584.0 -2002.0  -323.0    73.0     329.0     -1.0      211.0               3404.0
+
+== Betas estimadas (año previo a la entrada)
+       mercado  sector  tamaño  value  momentum  calidad  baja vol.
+KDP      0.06    1.07    0.00   0.00      0.02     0.00       0.00
+NRG      1.36    1.54    0.18  -0.04      0.37    -0.04      -0.18
+XEL      0.01    1.00    0.02   0.04     -0.01     0.00       0.03
+WAT      0.87    0.75    0.07   0.02      0.05     0.00      -0.00
+AXON     1.57   -0.20    1.14  -1.51     -0.78     0.18       1.25
+MLM      0.84    1.02    0.02   0.02     -0.02    -0.00       0.00
+GPN      1.01    1.40    0.16  -0.23     -0.41     0.20       0.09
+
+== Exposición de la cartera tras las órdenes: USD por cada +1 % del factor
+ mercado      -577.0
+sector      -5258.0
+tamaño      -1314.0
+value         609.0
+momentum      203.0
+calidad      -139.0
+baja vol.    -474.0
+
+== Exposición sectorial bruta en corto (USD)
+ Utilities                -133788.0
+Financials                -52778.0
+Health Care               -47660.0
+Materials                 -47556.0
+Industrials               -46199.0
+Information Technology    -45008.0
+Consumer Discretionary    -45003.0
+Consumer Staples          -35840.0
