@@ -524,6 +524,21 @@ Son dos backtests, ambos con 10 cortos cubiertos y netos de costes de Darwinex Z
 
 **Lectura.** ERC cumple su función: con pesos iguales, el valor más arriesgado aporta de media el 21 % del riesgo; con ERC, el 10 %, y el libro pasa de 7,8 a 10 apuestas efectivas. Pero cuesta rentabilidad: −0,12 %/mes, Sharpe de 0,50 a 0,43. Es lo mismo que en el §12.d: la sobrevaloración se corrige sobre todo en los valores más volátiles, que son los que ERC recorta. La mezcla 50/50 es el término medio: la mayor aportación de un valor baja del 21 % al 16 % perdiendo solo 0,06 %/mes. Las diferencias de rentabilidad no son estadísticamente significativas.
 
+### 12.g Cobertura con ETF sectoriales en lugar de SPY (`src/sector_hedge.py`)
+
+Darwinex ofrece CFD de los ETF sectoriales (XLU, XLV, XLB, XLF, XLI, XLP, XLY, XLK, XLE, XLRE, XLC; spreads de 2-6 pb). Mismo libro de 10 cortos (máx. 3 por sector), 2012-2026, neto Zero, con el coste de mover la cobertura y la retención sobre los dividendos de los ETF:
+
+| Cobertura | %/mes | t | Sharpe | Vol. % | DD máx. | 2012-16 | 2017-21 | 2022-26 | Alfa FF6 (t) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **SPY (actual)** | **0,49** | 2,2 | **0,50** | 11,8 | −25 % | 0,63 | 0,12 | 0,73 | 0,40 (2,1) |
+| ETF de su sector | 0,21 | 1,1 | 0,26 | 9,8 | −29 % | 0,45 | −0,25 | 0,45 | 0,20 (1,3) |
+| 50 % SPY / 50 % sectorial | 0,35 | 1,7 | 0,41 | 10,4 | −26 % | 0,54 | −0,06 | 0,59 | 0,30 (1,8) |
+| Sectorial ajustado por beta | 0,18 | 0,9 | 0,23 | 9,6 | −31 % | 0,41 | −0,32 | 0,48 | 0,17 (1,1) |
+
+**La cobertura con SPY lleva una apuesta sectorial implícita que gana dinero:** quedarse corto de los sectores de los 10 cortos frente al S&P 500 aporta +0,28 %/mes (t = 2,2; vol. 6,4 %). Es más de la mitad del resultado. Esa apuesta se explica en un 51 % por **"S&P 500 ponderado por capitalización frente al S&P 500 equiponderado"** (RSP − SPY: coeficiente −0,67, t = −6) y por tecnología frente al índice (XLK − SPY: +0,12, t = 3). Descontadas ambas, quedan 0,12 %/mes (t = 1,2). Es decir: en 2012-2026 la estrategia ganó en parte porque las grandes tecnológicas batieron a la acción media del índice. Es una tendencia de este periodo, no una ley, y es lo que costó dinero en las dos primeras semanas en real.
+
+**Lectura.** Cubrir con el ETF sectorial reduce poco el riesgo (vol. 11,8 → 9,8 %) y no mejora el peor drawdown, pero se lleva la mitad de la rentabilidad. **Se mantiene la cobertura con SPY**, sabiendo que incluye una inclinación hacia las mega caps frente a la acción media. Si se quisiera reducir esa inclinación, el término medio 50/50 conserva un Sharpe de 0,41. Darwinex no ofrece el S&P 500 equiponderado (RSP), que sería la cobertura más limpia.
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
