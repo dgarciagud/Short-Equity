@@ -329,6 +329,20 @@ def mna_flags(ciks, since):
     return out
 
 
+def write_mt5_orders(path, day, closes, opens, usd, hedge):
+    """Order file for tools/SYYExecutor.mq5: closes, new shorts (USD target; the EA sizes them
+    with the live price) and the hedge split (weights of the total short value)."""
+    rows = [(day, t.replace(".", ""), "CLOSE_SHORT", 0) for t in closes]
+    rows += [(day, t.replace(".", ""), "OPEN_SHORT", round(usd)) for t in opens]
+    rows += [(day, sym, "HEDGE", w) for sym, w in hedge.items()]
+    pd.DataFrame(rows, columns=["date", "symbol", "action", "value"]).to_csv(path, index=False)
+
+
+def parse_hedge(text):
+    """'SPY:0.5,RSP:0.5' -> {'SPY': 0.5, 'RSP': 0.5}"""
+    return {k: float(v) for k, v in (x.split(":") for x in text.split(","))}
+
+
 def risk_table(px, names, notional, cap):
     """Share of the hedged book's variance from each short (market-adjusted daily returns,
     126 sessions, Ledoit-Wolf); names above `cap` are flagged (REPORT 12.f)."""
@@ -378,6 +392,7 @@ def main():
     ap.add_argument("--max-changes", type=int, default=3, help="max replacements per week")
     ap.add_argument("--max-shares", type=int, default=1000, help="broker limit of shares per stock")
     ap.add_argument("--risk-cap", type=float, default=0.25, help="warn when a short exceeds this share of risk")
+    ap.add_argument("--hedge", default="SPY:1", help="hedge split for the MT5 order file, e.g. SPY:0.5,RSP:0.5")
     ap.add_argument("--build", type=int, default=None,
                     help="max new names into empty slots per week (default 4 the first week, then 3)")
     args = ap.parse_args()
@@ -471,6 +486,7 @@ def main():
                           "shares": [int(cand.acciones[t]) if t in new else held_sh.get(t, np.nan)
                                      for t in final] + [spy_n]})
     after.to_csv(LIVE / f"holdings_tras_ordenes{sfx}_{stamp}.csv", index=False)
+    write_mt5_orders(LIVE / f"mt5_orders{sfx}_{stamp}.csv", stamp, out, new, target, parse_hedge(args.hedge))
 
     cols = ["mt5", "name", "sector", "M", "n_anomalias", "precio", "acciones", "nocional_usd",
             "avg_spread_bps", "ultimo_informe", "fusiones_SEC"]
