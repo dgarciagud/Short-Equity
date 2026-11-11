@@ -440,15 +440,19 @@ def main():
     df = score(df)
     df.to_csv(LIVE / f"syy_score_{stamp}.csv", float_format="%.4f")
 
-    cand = sector_capped(df, 30)
-    flags = mna_flags(cand.cik, (asof - timedelta(days=180)).date().isoformat())
-    cand = cand.assign(fusiones_SEC=cand.cik.map(flags))
+    # filter (merger filings, one share too large) BEFORE the sector cap, so an excluded
+    # name does not take one of its sector's three places
+    pool = df[df.M.notna()].sort_values("M", ascending=False).head(60)
+    flags = mna_flags(pool.cik, (asof - timedelta(days=180)).date().isoformat())
+    pool = pool.assign(fusiones_SEC=pool.cik.map(flags))
     target = cap_usd * args.gross / N_SHORT
-    cand["acciones"] = (target / cand.precio).round().clip(lower=1, upper=args.max_shares).astype(int)
-    cand["nocional_usd"] = cand.acciones * cand.precio
-    ok = (cand.precio <= 1.5 * target) & (cand.fusiones_SEC == "")
-    book = cand[ok].head(N_SHORT)
-    skipped = cand[~ok & (cand.M >= book.M.min())]
+    pool["acciones"] = (target / pool.precio).round().clip(lower=1, upper=args.max_shares).astype(int)
+    pool["nocional_usd"] = pool.acciones * pool.precio
+    good = (pool.precio <= 1.5 * target) & (pool.fusiones_SEC == "")
+    cand = sector_capped(pool[good], 30)
+    ok = pd.Series(True, index=cand.index)
+    book = cand.head(N_SHORT)
+    skipped = pool[~good & (pool.M >= book.M.min())]
 
     # Current book: holdings.csv with columns ticker[,shares]; the SPY row is the hedge.
     hold_path = Path(args.holdings)
