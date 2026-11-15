@@ -133,3 +133,60 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def by_group(ks=(2, 3)):
+    """Gross return of every sector group's sleeve: its k cheapest names vs the sector ETF, and
+    k cheapest minus k dearest. Contribution to the book = group return / number of groups."""
+    p = pd.read_parquet(PANEL, columns=["cik", "date", "fwd"] + VAL)
+    sec = pd.read_parquet(data.ROOT / "results" / "recent" / "pit" / "panel.parquet", columns=["sector"])
+    sec = sec.rename_axis("cik").reset_index().drop_duplicates(["cik"], keep="last").set_index("cik").sector
+    p["sector"] = p.cik.map(sec)
+    p["grupo"] = p.sector.map(GROUP)
+    p = p.dropna(subset=["grupo", "fwd"])
+    pct = pd.concat([p.groupby(["date", "grupo"])[v].rank(pct=True) for v in VAL], axis=1)
+    p["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= 3)
+    p = p.dropna(subset=["V"])
+    tick = sorted(set(ETF.values()) | {"SPY"})
+    px = yf.download(tick, start="2011-12-01", auto_adjust=True, progress=False)["Close"].resample("ME").last()
+    efwd = px.pct_change(fill_method=None).shift(-1)
+
+    def etf_for(s, t):
+        e = ETF.get(s, "SPY")
+        return e if (e not in START or t >= pd.Timestamp(START[e])) and pd.notna(efwd.at[t, e]) else "SPY"
+
+    rows = []
+    for (t, grp), g in p.groupby(["date", "grupo"]):
+        if t not in efwd.index:
+            continue
+        o = g.sort_values("V")
+        rec = {"date": t, "grupo": grp, "n": len(g)}
+        for k in ks:
+            if len(o) < 4 * k:
+                continue
+            L, S = o.tail(k), o.head(k)
+            hedge = np.mean([efwd.at[t, etf_for(s, t)] for s in L.sector])
+            rec[f"largo{k}_ETF"] = L.fwd.mean() - hedge
+            rec[f"LS{k}"] = L.fwd.mean() - S.fwd.mean()
+            rec[f"largo{k}_abs"] = L.fwd.mean()
+        rows.append(rec)
+    r = pd.DataFrame(rows)
+    ngroups = r.groupby("date").grupo.count().mean()
+    out = []
+    for grp, g in r.groupby("grupo"):
+        g = g.set_index("date")
+        row = {"grupo": grp, "valores_medios": g.n.mean()}
+        for c in [c for c in g if c.startswith(("largo", "LS"))]:
+            s = g[c].dropna()
+            row[f"{c} %/mes"] = 100 * s.mean()
+            row[f"{c} Sharpe"] = s.mean() / s.std() * np.sqrt(12)
+            if c.endswith("_ETF"):
+                row[f"{c} aporte %/mes"] = 100 * s.mean() / ngroups
+                row[f"{c} meses+%"] = 100 * (s > 0).mean()
+                row[f"{c} 22-26"] = 100 * s.loc["2022":].mean()
+        out.append(row)
+    out = pd.DataFrame(out).sort_values("largo2_ETF %/mes", ascending=False)
+    out.to_csv(OUT / "por_sector.csv", index=False, float_format="%.4f")
+    pd.set_option("display.width", 300)
+    print(out.round(2).to_string(index=False))
+    return out
