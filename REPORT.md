@@ -548,6 +548,27 @@ La diferencia SPY − RSP (la inclinación hacia las mega caps) aporta 0,14 %/me
 
 **Lectura.** Cubrir con el ETF de cada sector reduce poco el riesgo y se lleva la mitad de la rentabilidad. **RSP es la cobertura más limpia**: quita la apuesta "mega caps frente a la acción media", conserva la mayor parte de la rentabilidad y reduce el peor drawdown de −25 % a −19 %. El término medio **50 % SPY / 50 % RSP** mantiene casi el mismo Sharpe que SPY (0,48 frente a 0,50) con un drawdown de −21 %.
 
+### 12.h Value dentro de cada sector (`src/sector_value.py`)
+
+**Universo:** S&P 500 histórico 2012-2026 sin inmobiliario (Darwinex casi no tiene REIT), en 7 grupos con 36-61 valores de media: tecnología y comunicaciones, industriales, consumo cíclico, salud, financiero, defensivos (consumo básico + utilities) y materias primas (materiales + energía).
+
+**Puntuación de value:** media de los percentiles, dentro de cada grupo, de B/M, E/P, CF/P, S/P y EBIT/EV, con datos de la SEC presentados en su fecha. Rebalanceo mensual, pesos iguales y neto de costes de Darwinex Zero.
+
+| Cartera | %/mes | t | Sharpe | Vol. % | DD máx. | 2012-16 | 2017-21 | 2022-26 | Corr. SYY | Corr. SPY | Alfa FF6 (t) | Sharpe 50/50 con SYY |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Factor tercil dentro del grupo (bruto) | 0,26 | 1,5 | 0,41 | 7,6 | −19 % | 0,28 | 0,23 | 0,26 | −0,41 | 0,16 | 0,27 (2,9) | 0,84 |
+| **2 más baratas por grupo, cubiertas con su ETF** | **0,53** | **3,2** | **0,80** | 7,9 | **−13 %** | 0,56 | 0,48 | 0,54 | **−0,47** | 0,29 | **0,49 (3,8)** | **1,26** |
+| 3 más baratas por grupo / ETF | 0,38 | 2,5 | 0,63 | 7,3 | −14 % | 0,42 | 0,28 | 0,45 | −0,50 | 0,35 | 0,33 (2,9) | 1,13 |
+| 4 más baratas por grupo / ETF | 0,34 | 2,3 | 0,59 | 6,9 | −11 % | 0,38 | 0,36 | 0,27 | −0,49 | 0,35 | 0,30 (3,2) | 1,07 |
+| 2 baratas largo / 2 caras corto por grupo | 0,81 | 2,5 | 0,66 | 14,6 | −27 % | 0,77 | 0,71 | 0,95 | −0,34 | 0,04 | 0,84 (3,3) | 1,01 |
+| 3 / 3 por grupo | 0,61 | 1,9 | 0,53 | 13,9 | −27 % | 0,54 | 0,56 | 0,73 | −0,36 | 0,05 | 0,62 (2,5) | 0,91 |
+
+**Lectura.** El value **dentro de cada sector** sí funciona en el S&P 500 reciente, al contrario que el value entre sectores (§12.e de la rama Kelly). Es positivo en los tres subperiodos, tiene alfa significativa frente a FF5 + momentum (incluido el propio HML) y es **la estrategia más descorrelacionada de SYY** (−0,47).
+
+La versión **solo de largos cubiertos con el ETF de su sector** es la mejor relación rentabilidad/riesgo: Sharpe 0,8 y DD de −13 %, con una rotación de ~15 % al mes. Las caras del sector, puestas en corto, restan más de lo que suman. **Combinada a igual riesgo con SYY, el Sharpe conjunto pasa a ~1,1-1,3.**
+
+**Precauciones:** son 14 valores, con riesgo propio alto por nombre. El número de valores por grupo (2, 3 o 4) se ha elegido en la misma muestra, aunque los tres funcionan. La retención de dividendos se ha estimado con una rentabilidad del 2,5 % (las value suelen pagar más). Al operar con el universo completo de Darwinex (medianas del S&P 400), esa parte no está validada.
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
