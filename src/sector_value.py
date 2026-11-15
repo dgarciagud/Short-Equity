@@ -1,4 +1,5 @@
-"""Value WITHIN each sector, point-in-time S&P 500 2012-2026, Darwinex Zero costs.
+"""Value (or quality, profitability) WITHIN each sector, point-in-time S&P 500 2012-2026, Darwinex
+Zero costs. Usage: python sector_value.py [value|calidad|rentabilidad|value+calidad] [grupos]
 
 Inputs: the SEC/price panel of the 13-theme study (branch analisis-13-familias-kelly,
 results/kelly/sec2_panel.parquet: B/M, E/P, CF/P, S/P, EBIT/EV, market value, next-month return)
@@ -15,6 +16,7 @@ Costs: half spread (MT5 export, 8 bp if unknown) + commission on weight changes;
 sector_hedge.py; 15 % withholding on the long stocks' dividends.
 """
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -29,8 +31,15 @@ from repo_xbrl import universe
 from sector_hedge import ETF, START
 
 PANEL = os.environ.get("KELLY_PANEL", "/home/user/Short-Equity-13-familias-kelly/results/kelly/sec2_panel.parquet")
-OUT = data.ROOT / "results" / "recent" / "value_sectorial"
-VAL = ["BM", "EP", "CFP", "SP", "EBITEV"]
+SCORES = {   # score -> {characteristic: sign}; high score = long
+    "value": {"BM": 1, "EP": 1, "CFP": 1, "SP": 1, "EBITEV": 1},
+    "calidad": {"ROA": 1, "ATO": 1, "GM": 1, "FSCORE": 1, "OSC": -1, "EVAR": -1},
+    "rentabilidad": {"PROF": 1, "ROE": 1, "OPBE": 1, "OPA": 1, "CFOA": 1},
+}
+SCORES["value+calidad"] = {**SCORES["value"], **SCORES["calidad"]}
+SCORE = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in SCORES else "value"
+OUT = data.ROOT / "results" / "recent" / f"{SCORE.replace('+', '_')}_sectorial"
+VAL = list(SCORES[SCORE])
 GROUP = {"Information Technology": "Tecnología y comunicaciones", "Communication Services": "Tecnología y comunicaciones",
          "Industrials": "Industriales", "Consumer Discretionary": "Consumo cíclico", "Health Care": "Salud",
          "Financials": "Financiero", "Consumer Staples": "Defensivos", "Utilities": "Defensivos",
@@ -45,8 +54,9 @@ def main():
     p["sector"] = p.cik.map(sec)
     p["grupo"] = p.sector.map(GROUP)
     p = p.dropna(subset=["grupo", "fwd"])
-    pct = pd.concat([p.groupby(["date", "grupo"])[v].rank(pct=True) for v in VAL], axis=1)
-    p["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= 3)
+    pct = pd.concat([p.groupby(["date", "grupo"])[v].rank(pct=True, ascending=SCORES[SCORE][v] > 0)
+                     for v in VAL], axis=1)
+    p["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= max(3, len(VAL) // 2))
     p = p.dropna(subset=["V"])
 
     uni = universe().drop_duplicates("cik")
@@ -131,10 +141,6 @@ def main():
     print("Valores por grupo (media mensual):", p.groupby(["date", "grupo"]).size().groupby("grupo").mean().round(0).to_dict())
 
 
-if __name__ == "__main__":
-    main()
-
-
 def by_group(ks=(2, 3)):
     """Gross return of every sector group's sleeve: its k cheapest names vs the sector ETF, and
     k cheapest minus k dearest. Contribution to the book = group return / number of groups."""
@@ -144,8 +150,9 @@ def by_group(ks=(2, 3)):
     p["sector"] = p.cik.map(sec)
     p["grupo"] = p.sector.map(GROUP)
     p = p.dropna(subset=["grupo", "fwd"])
-    pct = pd.concat([p.groupby(["date", "grupo"])[v].rank(pct=True) for v in VAL], axis=1)
-    p["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= 3)
+    pct = pd.concat([p.groupby(["date", "grupo"])[v].rank(pct=True, ascending=SCORES[SCORE][v] > 0)
+                     for v in VAL], axis=1)
+    p["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= max(3, len(VAL) // 2))
     p = p.dropna(subset=["V"])
     tick = sorted(set(ETF.values()) | {"SPY"})
     px = yf.download(tick, start="2011-12-01", auto_adjust=True, progress=False)["Close"].resample("ME").last()
@@ -190,3 +197,9 @@ def by_group(ks=(2, 3)):
     pd.set_option("display.width", 300)
     print(out.round(2).to_string(index=False))
     return out
+
+
+if __name__ == "__main__":
+    main()
+    if len(sys.argv) > 2 and sys.argv[2] == "grupos":
+        by_group()

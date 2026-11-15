@@ -569,6 +569,19 @@ La versión **solo de largos cubiertos con el ETF de su sector** es la mejor rel
 
 **Precauciones:** son 14 valores, con riesgo propio alto por nombre. El número de valores por grupo (2, 3 o 4) se ha elegido en la misma muestra, aunque los tres funcionan. La retención de dividendos se ha estimado con una rentabilidad del 2,5 % (las value suelen pagar más). Al operar con el universo completo de Darwinex (medianas del S&P 400), esa parte no está validada.
 
+**Calidad y rentabilidad dentro de cada sector** (`python src/sector_value.py calidad|rentabilidad|value+calidad grupos`), con el mismo método.
+* Calidad: ROA, rotación del activo, margen bruto, F-score, −O-score, −variabilidad del beneficio.
+* Rentabilidad: GP/A, ROE, beneficio operativo/BE, beneficio operativo/A, CFO/A.
+
+| Cartera (neto Zero) | Calidad %/mes (Sharpe) | Rentabilidad %/mes (Sharpe) | Value + calidad %/mes (Sharpe) | Value solo %/mes (Sharpe) |
+|---|---:|---:|---:|---:|
+| 2 mejores por grupo / ETF | −0,28 (−0,44) | −0,30 (−0,54) | 0,26 (0,44) | **0,53 (0,80)** |
+| 3 mejores por grupo / ETF | −0,18 (−0,33) | −0,25 (−0,50) | 0,25 (0,48) | 0,38 (0,63) |
+| 4 mejores por grupo / ETF | −0,24 (−0,51) | −0,23 (−0,48) | 0,30 (0,63) | 0,34 (0,59) |
+| 3 mejores / 3 peores por grupo | −0,23 (−0,21) | −0,26 (−0,24) | 0,35 (0,38) | 0,61 (0,53) |
+
+**Dentro de cada sector, calidad y rentabilidad no funcionan** en el S&P 500 equiponderado de 2012-2026. Solo ganan en 2017-2021 y pierden en 2012-16 y 2022-26. Por grupos, solo el financiero es algo positivo. Su correlación con SYY es positiva en las versiones larga/corta (0,2-0,4): SYY ya incorpora rentabilidad. Mezcladas con value **lo diluyen** (Sharpe 0,80 → 0,44-0,63), porque en cada sector las empresas de calidad suelen ser las caras. Confirma el §12.d de la rama Kelly: la prima de calidad/rentabilidad de 2012-2025 está en las mayores empresas ponderadas por capitalización, no en la empresa típica de cada sector. **Para la cartera se usa value dentro de cada sector, sin calidad.**
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
