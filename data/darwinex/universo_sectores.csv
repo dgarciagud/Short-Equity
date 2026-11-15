@@ -1,0 +1,707 @@
+symbol,grupo,sector
+AAPL,S&P 500,Information Technology
+AMZN,S&P 500,Consumer Discretionary
+GLD,ETF,ETF
+IWM,ETF,ETF
+NVDA,S&P 500,Information Technology
+QQQ,ETF,ETF
+SPY,ETF,ETF
+TLT,ETF,ETF
+TSLA,S&P 500,Consumer Discretionary
+XLK,ETF,ETF
+DIA,ETF,ETF
+MSFT,S&P 500,Information Technology
+KO,S&P 500,Consumer Staples
+AAL,Resto EE. UU.,Industrials
+A,S&P 500,Health Care
+AA,Resto EE. UU.,Materials
+AAP,Resto EE. UU.,Consumer Discretionary
+ABBV,S&P 500,Health Care
+ACHC,Resto EE. UU.,Health Care
+ABT,S&P 500,Health Care
+ACM,Resto EE. UU.,Industrials
+ACN,S&P 500,Information Technology
+ADM,S&P 500,Consumer Staples
+AEP,S&P 500,Utilities
+AES,S&P 500,Utilities
+AFG,Resto EE. UU.,Financials
+AFL,S&P 500,Financials
+AGCO,Resto EE. UU.,Industrials
+AIG,S&P 500,Financials
+AIZ,S&P 500,Financials
+AJG,S&P 500,Financials
+ADBE,S&P 500,Information Technology
+ADI,S&P 500,Information Technology
+ADP,S&P 500,Industrials
+ADSK,S&P 500,Information Technology
+AKAM,S&P 500,Information Technology
+ALB,S&P 500,Materials
+ALGN,S&P 500,Health Care
+ALK,Resto EE. UU.,Industrials
+ALL,S&P 500,Financials
+ALLY,Resto EE. UU.,Financials
+ALNY,Resto EE. UU.,Health Care
+AME,S&P 500,Industrials
+AMAT,S&P 500,Information Technology
+AMD,S&P 500,Information Technology
+AMG,Resto EE. UU.,Financials
+AMGN,S&P 500,Health Care
+AMKR,Resto EE. UU.,Information Technology
+AMP,S&P 500,Financials
+AMT,S&P 500,Real Estate
+AN,Resto EE. UU.,Consumer Discretionary
+ANET,S&P 500,Information Technology
+AON,S&P 500,Financials
+AOS,S&P 500,Industrials
+APA,S&P 500,Energy
+APD,S&P 500,Materials
+APH,S&P 500,Information Technology
+ARCC,Resto EE. UU.,Unknown
+ARES,S&P 500,Financials
+ARMK,Resto EE. UU.,Consumer Discretionary
+ARW,Resto EE. UU.,Consumer Discretionary
+ARWR,Resto EE. UU.,Health Care
+ASH,Resto EE. UU.,Consumer Discretionary
+AVTR,Resto EE. UU.,Information Technology
+AVY,S&P 500,Materials
+AWI,Resto EE. UU.,Industrials
+AWK,S&P 500,Utilities
+AVGO,S&P 500,Information Technology
+AXON,S&P 500,Industrials
+AXTA,Resto EE. UU.,Materials
+AYI,Resto EE. UU.,Information Technology
+AZO,S&P 500,Consumer Discretionary
+COR,S&P 500,Health Care
+BAC,S&P 500,Financials
+BAH,Resto EE. UU.,Industrials
+BALL,S&P 500,Materials
+BAX,S&P 500,Health Care
+BBY,S&P 500,Consumer Discretionary
+BC,Resto EE. UU.,Industrials
+BDX,S&P 500,Health Care
+BEN,S&P 500,Financials
+BFAM,Resto EE. UU.,Industrials
+BILL,Resto EE. UU.,Information Technology
+BIO,Resto EE. UU.,Information Technology
+BJ,Resto EE. UU.,Consumer Discretionary
+BKR,S&P 500,Energy
+BLK,S&P 500,Financials
+BMY,S&P 500,Health Care
+BR,S&P 500,Industrials
+BRKb,Resto EE. UU.,Financials
+BRO,S&P 500,Financials
+BSX,S&P 500,Health Care
+BURL,Resto EE. UU.,Consumer Discretionary
+BWA,Resto EE. UU.,Consumer Discretionary
+BX,S&P 500,Financials
+BYD,Resto EE. UU.,Consumer Discretionary
+C,S&P 500,Financials
+CABO,Resto EE. UU.,Communication Services
+CACI,Resto EE. UU.,Information Technology
+CAG,Resto EE. UU.,Consumer Staples
+CAH,S&P 500,Health Care
+CARR,S&P 500,Industrials
+CB,S&P 500,Financials
+CBRE,S&P 500,Real Estate
+CC,Resto EE. UU.,Materials
+CCI,S&P 500,Real Estate
+CCK,Resto EE. UU.,Industrials
+CCL,S&P 500,Consumer Discretionary
+CE,Resto EE. UU.,Materials
+CF,S&P 500,Materials
+CFG,S&P 500,Financials
+CFR,Resto EE. UU.,Financials
+CHD,S&P 500,Consumer Staples
+CHE,Resto EE. UU.,Health Care
+CHWY,Resto EE. UU.,Consumer Discretionary
+CI,S&P 500,Health Care
+CIEN,S&P 500,Information Technology
+CL,S&P 500,Consumer Staples
+CLF,Resto EE. UU.,Materials
+CLX,S&P 500,Consumer Staples
+CMG,S&P 500,Consumer Discretionary
+CMI,S&P 500,Industrials
+CMS,S&P 500,Utilities
+CNC,S&P 500,Health Care
+CNP,S&P 500,Utilities
+COF,S&P 500,Financials
+COHR,S&P 500,Information Technology
+COO,S&P 500,Health Care
+COP,S&P 500,Energy
+CPAY,S&P 500,Financials
+CRL,S&P 500,Health Care
+CRM,S&P 500,Information Technology
+CSL,Resto EE. UU.,Industrials
+CTVA,Resto EE. UU.,Industrials
+CVNA,S&P 500,Consumer Discretionary
+CVS,S&P 500,Health Care
+D,S&P 500,Utilities
+DAL,S&P 500,Industrials
+DAR,Resto EE. UU.,Consumer Staples
+AZTA,Resto EE. UU.,Industrials
+BIIB,S&P 500,Health Care
+BKNG,S&P 500,Consumer Discretionary
+BL,Resto EE. UU.,Information Technology
+BLDR,Resto EE. UU.,Consumer Discretionary
+BMRN,Resto EE. UU.,Health Care
+BRKR,Resto EE. UU.,Information Technology
+CACC,Resto EE. UU.,Financials
+CAR,Resto EE. UU.,Industrials
+CASY,S&P 500,Consumer Staples
+CDNS,S&P 500,Information Technology
+CDW,S&P 500,Information Technology
+CG,Resto EE. UU.,Financials
+CGNX,Resto EE. UU.,Information Technology
+CHDN,Resto EE. UU.,Industrials
+CHRW,S&P 500,Industrials
+CHTR,S&P 500,Communication Services
+CINF,S&P 500,Financials
+CMCSA,S&P 500,Communication Services
+CME,S&P 500,Financials
+COLM,Resto EE. UU.,Consumer Discretionary
+COST,S&P 500,Consumer Staples
+CPRT,S&P 500,Industrials
+CROX,Resto EE. UU.,Industrials
+CRWD,S&P 500,Information Technology
+CSGP,S&P 500,Real Estate
+CSX,S&P 500,Industrials
+CTAS,S&P 500,Industrials
+CTSH,S&P 500,Information Technology
+DBX,Resto EE. UU.,Information Technology
+DDOG,S&P 500,Information Technology
+DD,S&P 500,Industrials
+DE,S&P 500,Industrials
+DECK,S&P 500,Consumer Discretionary
+DELL,S&P 500,Information Technology
+DG,S&P 500,Consumer Staples
+DGX,S&P 500,Health Care
+DHI,S&P 500,Consumer Discretionary
+DHR,S&P 500,Health Care
+DKS,Resto EE. UU.,Consumer Discretionary
+DLB,Resto EE. UU.,Financials
+DLTR,S&P 500,Consumer Staples
+DNLI,Resto EE. UU.,Health Care
+DOCU,Resto EE. UU.,Information Technology
+DOV,S&P 500,Industrials
+DOX,Resto EE. UU.,Information Technology
+DPZ,S&P 500,Consumer Discretionary
+DRI,S&P 500,Consumer Discretionary
+DT,Resto EE. UU.,Information Technology
+DTE,S&P 500,Utilities
+DUK,S&P 500,Utilities
+DVA,S&P 500,Health Care
+DVN,S&P 500,Energy
+DXC,Resto EE. UU.,Information Technology
+DXCM,S&P 500,Health Care
+ECL,S&P 500,Materials
+EBAY,S&P 500,Consumer Discretionary
+EEFT,Resto EE. UU.,Financials
+EFX,S&P 500,Industrials
+EHC,Resto EE. UU.,Health Care
+EIX,S&P 500,Utilities
+EL,S&P 500,Consumer Staples
+ELAN,Resto EE. UU.,Health Care
+ELV,S&P 500,Health Care
+EME,S&P 500,Industrials
+EMN,Resto EE. UU.,Materials
+EMR,S&P 500,Industrials
+ENOV,Resto EE. UU.,Health Care
+ENPH,Resto EE. UU.,Information Technology
+ENTG,Resto EE. UU.,Industrials
+EOG,S&P 500,Energy
+EPAM,Resto EE. UU.,Information Technology
+EQH,Resto EE. UU.,Financials
+EQT,S&P 500,Energy
+ES,S&P 500,Utilities
+ESI,Resto EE. UU.,Materials
+ESNT,Resto EE. UU.,Financials
+ESTC,Resto EE. UU.,Information Technology
+ETN,S&P 500,Industrials
+ETR,S&P 500,Utilities
+ETSY,Resto EE. UU.,Industrials
+EVR,Resto EE. UU.,Financials
+EVRG,S&P 500,Utilities
+EWBC,Resto EE. UU.,Financials
+EXEL,Resto EE. UU.,Health Care
+EW,S&P 500,Health Care
+EXC,S&P 500,Utilities
+EXP,Resto EE. UU.,Materials
+EXPD,S&P 500,Industrials
+EXPE,S&P 500,Consumer Discretionary
+F,S&P 500,Consumer Discretionary
+FAF,Resto EE. UU.,Financials
+FANG,S&P 500,Energy
+FBIN,Resto EE. UU.,Industrials
+FCX,S&P 500,Materials
+FISV,S&P 500,Financials
+FDS,S&P 500,Financials
+FDX,S&P 500,Industrials
+FE,S&P 500,Utilities
+FAST,S&P 500,Industrials
+FFIV,S&P 500,Information Technology
+FHN,Resto EE. UU.,Financials
+FICO,S&P 500,Information Technology
+FITB,S&P 500,Financials
+FIVE,Resto EE. UU.,Consumer Discretionary
+FIVN,Resto EE. UU.,Information Technology
+FLEX,S&P 500,Information Technology
+FIS,S&P 500,Financials
+FLS,Resto EE. UU.,Industrials
+FMC,Resto EE. UU.,Materials
+FND,Resto EE. UU.,Consumer Discretionary
+FNF,Resto EE. UU.,Financials
+FOX,S&P 500,Communication Services
+FOXA,S&P 500,Communication Services
+FOXF,Resto EE. UU.,Industrials
+FRPT,Resto EE. UU.,Consumer Staples
+FSLR,S&P 500,Information Technology
+FTNT,S&P 500,Information Technology
+FTV,S&P 500,Industrials
+G,Resto EE. UU.,Industrials
+GD,S&P 500,Industrials
+GDDY,S&P 500,Information Technology
+GGG,Resto EE. UU.,Industrials
+GEN,S&P 500,Information Technology
+GH,Resto EE. UU.,Health Care
+GIS,S&P 500,Consumer Staples
+GL,S&P 500,Financials
+GLW,S&P 500,Information Technology
+GM,S&P 500,Consumer Discretionary
+GMED,Resto EE. UU.,Health Care
+GNRC,S&P 500,Industrials
+GILD,S&P 500,Health Care
+GNTX,Resto EE. UU.,Consumer Discretionary
+GPC,S&P 500,Consumer Discretionary
+GPK,Resto EE. UU.,Materials
+GPN,S&P 500,Financials
+GOOG,S&P 500,Communication Services
+GOOGL,S&P 500,Communication Services
+GWRE,Resto EE. UU.,Information Technology
+GWW,S&P 500,Industrials
+H,Resto EE. UU.,Consumer Discretionary
+HALO,Resto EE. UU.,Health Care
+HAS,S&P 500,Consumer Discretionary
+HBAN,S&P 500,Financials
+HAL,S&P 500,Energy
+HCA,S&P 500,Health Care
+HEI,Resto EE. UU.,Industrials
+HELE,Resto EE. UU.,Information Technology
+HIG,S&P 500,Financials
+HII,S&P 500,Industrials
+HLT,S&P 500,Consumer Discretionary
+HOG,Resto EE. UU.,Industrials
+HQY,Resto EE. UU.,Industrials
+HSIC,S&P 500,Health Care
+HON,S&P 500,Industrials
+HPE,S&P 500,Information Technology
+HPQ,S&P 500,Information Technology
+HUBB,S&P 500,Industrials
+HUBS,Resto EE. UU.,Information Technology
+HUM,S&P 500,Health Care
+HUN,Resto EE. UU.,Materials
+HWM,S&P 500,Industrials
+HXL,Resto EE. UU.,Materials
+IBKR,S&P 500,Financials
+IDXX,S&P 500,Health Care
+ICE,S&P 500,Financials
+IEX,S&P 500,Industrials
+IFF,S&P 500,Materials
+ILMN,S&P 500,Health Care
+INCY,S&P 500,Health Care
+INGR,Resto EE. UU.,Consumer Staples
+INSP,Resto EE. UU.,Health Care
+INTU,S&P 500,Information Technology
+IONS,Resto EE. UU.,Health Care
+IP,S&P 500,Materials
+IPGP,Resto EE. UU.,Information Technology
+IQV,S&P 500,Health Care
+IR,S&P 500,Industrials
+IRDM,Resto EE. UU.,Communication Services
+IT,S&P 500,Information Technology
+ITT,Resto EE. UU.,Industrials
+ITW,S&P 500,Industrials
+IVZ,S&P 500,Financials
+J,S&P 500,Industrials
+ISRG,S&P 500,Health Care
+JBHT,S&P 500,Industrials
+JBL,S&P 500,Information Technology
+JCI,S&P 500,Industrials
+JEF,Resto EE. UU.,Financials
+JKHY,S&P 500,Financials
+JLL,Resto EE. UU.,Real Estate
+KBR,Resto EE. UU.,Industrials
+KDP,S&P 500,Consumer Staples
+KEY,S&P 500,Financials
+KEYS,S&P 500,Information Technology
+KKR,S&P 500,Financials
+KMB,S&P 500,Consumer Staples
+KMI,S&P 500,Energy
+KMX,Resto EE. UU.,Consumer Discretionary
+KNX,Resto EE. UU.,Industrials
+KR,S&P 500,Consumer Staples
+KSS,Resto EE. UU.,Consumer Discretionary
+L,S&P 500,Financials
+LAD,Resto EE. UU.,Consumer Discretionary
+KHC,S&P 500,Consumer Staples
+KLAC,S&P 500,Information Technology
+LDOS,S&P 500,Industrials
+LEA,Resto EE. UU.,Consumer Discretionary
+LEN,S&P 500,Consumer Discretionary
+LEVI,Resto EE. UU.,Consumer Discretionary
+LH,S&P 500,Health Care
+LHX,S&P 500,Industrials
+LII,S&P 500,Industrials
+LITE,S&P 500,Information Technology
+LKQ,Resto EE. UU.,Consumer Discretionary
+LLY,S&P 500,Health Care
+LMT,S&P 500,Industrials
+LNC,Resto EE. UU.,Financials
+LNT,S&P 500,Utilities
+LPLA,Resto EE. UU.,Financials
+LOW,S&P 500,Consumer Discretionary
+LPX,Resto EE. UU.,Industrials
+LRCX,S&P 500,Information Technology
+LSCC,Resto EE. UU.,Information Technology
+LSTR,Resto EE. UU.,Industrials
+LUV,S&P 500,Industrials
+LVS,S&P 500,Consumer Discretionary
+LW,Resto EE. UU.,Consumer Staples
+LYFT,Resto EE. UU.,Industrials
+LYB,S&P 500,Materials
+LYV,S&P 500,Communication Services
+M,Resto EE. UU.,Consumer Discretionary
+MA,S&P 500,Financials
+MAN,Resto EE. UU.,Industrials
+MANH,Resto EE. UU.,Information Technology
+MAS,S&P 500,Industrials
+MAR,S&P 500,Consumer Discretionary
+MAT,Resto EE. UU.,Industrials
+MCK,S&P 500,Health Care
+MCO,S&P 500,Financials
+MCHP,S&P 500,Information Technology
+MDB,Resto EE. UU.,Information Technology
+MDLZ,S&P 500,Consumer Staples
+MEDP,Resto EE. UU.,Industrials
+MDT,S&P 500,Health Care
+MET,S&P 500,Financials
+MGM,S&P 500,Consumer Discretionary
+MHK,Resto EE. UU.,Industrials
+META,S&P 500,Communication Services
+MIDD,Resto EE. UU.,Industrials
+MKL,Resto EE. UU.,Financials
+MKSI,Resto EE. UU.,Information Technology
+MKTX,Resto EE. UU.,Financials
+MLM,S&P 500,Materials
+MNST,S&P 500,Consumer Staples
+MO,S&P 500,Consumer Staples
+MOH,Resto EE. UU.,Health Care
+MOS,S&P 500,Materials
+MPWR,S&P 500,Information Technology
+MRNA,S&P 500,Health Care
+MPC,S&P 500,Energy
+MRVL,S&P 500,Information Technology
+MS,S&P 500,Financials
+MSCI,S&P 500,Financials
+MSI,S&P 500,Information Technology
+MSM,Resto EE. UU.,Consumer Discretionary
+MSTR,Resto EE. UU.,Financials
+MTB,S&P 500,Financials
+MTD,S&P 500,Health Care
+MTN,Resto EE. UU.,Industrials
+MTZ,Resto EE. UU.,Industrials
+MU,S&P 500,Information Technology
+NBIX,Resto EE. UU.,Health Care
+NCLH,S&P 500,Consumer Discretionary
+NDAQ,S&P 500,Financials
+NDSN,S&P 500,Industrials
+NEE,S&P 500,Utilities
+NEM,S&P 500,Materials
+NET,Resto EE. UU.,Information Technology
+NI,S&P 500,Utilities
+NFLX,S&P 500,Communication Services
+NOC,S&P 500,Industrials
+NOV,Resto EE. UU.,Industrials
+NOW,S&P 500,Information Technology
+NRG,S&P 500,Utilities
+NTAP,S&P 500,Information Technology
+NTNX,Resto EE. UU.,Information Technology
+NTRS,S&P 500,Financials
+NSC,S&P 500,Industrials
+NUE,S&P 500,Materials
+NVST,Resto EE. UU.,Health Care
+NWL,Resto EE. UU.,Industrials
+NWSA,S&P 500,Communication Services
+NXST,Resto EE. UU.,Communication Services
+NYT,Resto EE. UU.,Communication Services
+OC,Resto EE. UU.,Materials
+ODFL,S&P 500,Industrials
+OGE,Resto EE. UU.,Utilities
+OKTA,S&P 500,Information Technology
+OLED,Resto EE. UU.,Information Technology
+OLLI,Resto EE. UU.,Consumer Discretionary
+OLN,Resto EE. UU.,Materials
+OMCL,Resto EE. UU.,Information Technology
+OMC,S&P 500,Communication Services
+OMF,Resto EE. UU.,Financials
+ON,S&P 500,Information Technology
+ORCL,S&P 500,Information Technology
+ORI,Resto EE. UU.,Financials
+OSK,Resto EE. UU.,Consumer Discretionary
+OTIS,S&P 500,Industrials
+ORLY,S&P 500,Consumer Discretionary
+OZK,Resto EE. UU.,Unknown
+OXY,S&P 500,Energy
+PANW,S&P 500,Information Technology
+PAYC,Resto EE. UU.,Information Technology
+PAYX,S&P 500,Industrials
+PCAR,S&P 500,Industrials
+PCTY,Resto EE. UU.,Information Technology
+PEG,S&P 500,Utilities
+PEGA,Resto EE. UU.,Information Technology
+PEN,Resto EE. UU.,Health Care
+PENN,Resto EE. UU.,Consumer Discretionary
+PEP,S&P 500,Consumer Staples
+PFG,S&P 500,Financials
+PFGC,Resto EE. UU.,Consumer Staples
+PGNY,Resto EE. UU.,Health Care
+PGR,S&P 500,Financials
+PH,S&P 500,Industrials
+PHM,S&P 500,Consumer Discretionary
+PII,Resto EE. UU.,Industrials
+PINS,Resto EE. UU.,Information Technology
+PKG,S&P 500,Materials
+PLD,S&P 500,Real Estate
+PLNT,Resto EE. UU.,Industrials
+PNFP,Resto EE. UU.,Financials
+PM,S&P 500,Consumer Staples
+PNC,S&P 500,Financials
+PNW,S&P 500,Utilities
+PODD,S&P 500,Health Care
+POOL,Resto EE. UU.,Consumer Discretionary
+POST,Resto EE. UU.,Consumer Staples
+PPG,S&P 500,Materials
+PPL,S&P 500,Utilities
+PRU,S&P 500,Financials
+PSA,S&P 500,Real Estate
+AXP,S&P 500,Financials
+BA,S&P 500,Industrials
+CAT,S&P 500,Industrials
+CSCO,S&P 500,Information Technology
+CVX,S&P 500,Energy
+DIS,S&P 500,Communication Services
+DOW,S&P 500,Materials
+GE,S&P 500,Industrials
+GS,S&P 500,Financials
+HD,S&P 500,Consumer Discretionary
+IBM,S&P 500,Information Technology
+INTC,S&P 500,Information Technology
+JNJ,S&P 500,Health Care
+JPM,S&P 500,Financials
+MCD,S&P 500,Consumer Discretionary
+MMM,S&P 500,Industrials
+MRK,S&P 500,Health Care
+NKE,S&P 500,Consumer Discretionary
+PFE,S&P 500,Health Care
+PG,S&P 500,Consumer Staples
+TRV,S&P 500,Financials
+UNH,S&P 500,Health Care
+V,S&P 500,Financials
+VZ,S&P 500,Communication Services
+WMT,S&P 500,Consumer Staples
+XOM,S&P 500,Energy
+PVH,Resto EE. UU.,Consumer Discretionary
+PWR,S&P 500,Industrials
+QTWO,Resto EE. UU.,Information Technology
+RCL,S&P 500,Consumer Discretionary
+RF,S&P 500,Financials
+RGA,Resto EE. UU.,Financials
+RH,Resto EE. UU.,Consumer Discretionary
+RHI,Resto EE. UU.,Industrials
+RJF,S&P 500,Financials
+RL,S&P 500,Consumer Discretionary
+RMD,S&P 500,Health Care
+RNG,Resto EE. UU.,Information Technology
+ROK,S&P 500,Industrials
+ROL,S&P 500,Industrials
+ROP,S&P 500,Information Technology
+RPM,Resto EE. UU.,Materials
+RRX,Resto EE. UU.,Industrials
+RS,Resto EE. UU.,Consumer Discretionary
+RSG,S&P 500,Industrials
+RTX,S&P 500,Industrials
+RVTY,S&P 500,Health Care
+PTC,S&P 500,Information Technology
+PYPL,S&P 500,Financials
+QCOM,S&P 500,Information Technology
+RARE,Resto EE. UU.,Health Care
+REGN,S&P 500,Health Care
+RGEN,Resto EE. UU.,Health Care
+RGLD,Resto EE. UU.,Financials
+ROKU,Resto EE. UU.,Communication Services
+ROST,S&P 500,Consumer Discretionary
+RRR,Resto EE. UU.,Consumer Discretionary
+SAIA,Resto EE. UU.,Industrials
+SAIC,Resto EE. UU.,Information Technology
+SAM,Resto EE. UU.,Consumer Staples
+SCHW,S&P 500,Financials
+SCI,Resto EE. UU.,Industrials
+SF,Resto EE. UU.,Financials
+SHW,S&P 500,Materials
+SITE,Resto EE. UU.,Consumer Discretionary
+SJM,S&P 500,Consumer Staples
+SLB,S&P 500,Energy
+SMG,Resto EE. UU.,Materials
+SNA,S&P 500,Industrials
+SNAP,Resto EE. UU.,Information Technology
+SNX,Resto EE. UU.,Consumer Discretionary
+SO,S&P 500,Utilities
+SPG,S&P 500,Real Estate
+SPGI,S&P 500,Financials
+SRE,S&P 500,Utilities
+ST,Resto EE. UU.,Information Technology
+STE,S&P 500,Health Care
+STT,S&P 500,Financials
+STZ,S&P 500,Consumer Staples
+SWK,S&P 500,Industrials
+SYF,S&P 500,Financials
+SYK,S&P 500,Health Care
+SYY,S&P 500,Consumer Staples
+T,S&P 500,Communication Services
+SBUX,S&P 500,Consumer Discretionary
+SLAB,Resto EE. UU.,Information Technology
+SLM,Resto EE. UU.,Financials
+SNPS,S&P 500,Information Technology
+SRPT,Resto EE. UU.,Health Care
+SSNC,Resto EE. UU.,Information Technology
+STLD,S&P 500,Materials
+SWKS,S&P 500,Information Technology
+SYNA,Resto EE. UU.,Information Technology
+TECH,S&P 500,Health Care
+TER,S&P 500,Information Technology
+TMUS,S&P 500,Communication Services
+TNDM,Resto EE. UU.,Health Care
+TRIP,Resto EE. UU.,Information Technology
+TRMB,S&P 500,Information Technology
+TROW,S&P 500,Financials
+TSCO,S&P 500,Consumer Discretionary
+TTD,Resto EE. UU.,Information Technology
+TTEK,Resto EE. UU.,Industrials
+TTWO,S&P 500,Communication Services
+TXG,Resto EE. UU.,Information Technology
+TXN,S&P 500,Information Technology
+TXRH,Resto EE. UU.,Consumer Discretionary
+ULTA,S&P 500,Consumer Discretionary
+UTHR,Resto EE. UU.,Health Care
+VIR,Resto EE. UU.,Health Care
+VIRT,Resto EE. UU.,Financials
+VRNS,Resto EE. UU.,Information Technology
+VRSK,S&P 500,Industrials
+VRSN,S&P 500,Information Technology
+VRTX,S&P 500,Health Care
+VTRS,S&P 500,Health Care
+WDAY,S&P 500,Information Technology
+WDC,S&P 500,Information Technology
+TAP,Resto EE. UU.,Consumer Staples
+TDG,S&P 500,Industrials
+TDY,S&P 500,Information Technology
+TFC,S&P 500,Financials
+TFX,Resto EE. UU.,Health Care
+TGT,S&P 500,Consumer Staples
+THC,Resto EE. UU.,Health Care
+THO,Resto EE. UU.,Consumer Discretionary
+TJX,S&P 500,Consumer Discretionary
+TKR,Resto EE. UU.,Industrials
+TMO,S&P 500,Health Care
+TNL,Resto EE. UU.,Consumer Discretionary
+TOL,Resto EE. UU.,Industrials
+TPL,S&P 500,Energy
+TPR,S&P 500,Consumer Discretionary
+TREX,Resto EE. UU.,Industrials
+TRGP,S&P 500,Energy
+TRU,Resto EE. UU.,Industrials
+TSN,S&P 500,Consumer Staples
+TTC,Resto EE. UU.,Industrials
+TWLO,S&P 500,Information Technology
+TXT,S&P 500,Industrials
+TYL,S&P 500,Information Technology
+UAL,S&P 500,Industrials
+UBER,S&P 500,Industrials
+UGI,Resto EE. UU.,Utilities
+UHS,S&P 500,Health Care
+UNM,Resto EE. UU.,Financials
+UNP,S&P 500,Industrials
+UPS,S&P 500,Industrials
+URI,S&P 500,Industrials
+USB,S&P 500,Financials
+USFD,Resto EE. UU.,Consumer Staples
+VAC,Resto EE. UU.,Real Estate
+VEEV,S&P 500,Health Care
+VFC,Resto EE. UU.,Consumer Discretionary
+VLO,S&P 500,Energy
+VMC,S&P 500,Materials
+VOYA,Resto EE. UU.,Financials
+VST,S&P 500,Utilities
+VVV,Resto EE. UU.,Energy
+VYX,Resto EE. UU.,Information Technology
+W,Resto EE. UU.,Consumer Discretionary
+WAB,S&P 500,Industrials
+WAL,Resto EE. UU.,Financials
+WAT,S&P 500,Health Care
+WCC,Resto EE. UU.,Consumer Discretionary
+WEC,S&P 500,Utilities
+WEX,Resto EE. UU.,Industrials
+WFC,S&P 500,Financials
+WH,Resto EE. UU.,Consumer Discretionary
+WHR,Resto EE. UU.,Information Technology
+WK,Resto EE. UU.,Information Technology
+WM,S&P 500,Industrials
+WMB,S&P 500,Energy
+WMS,Resto EE. UU.,Industrials
+WRB,S&P 500,Financials
+WSM,S&P 500,Consumer Discretionary
+WSO,Resto EE. UU.,Consumer Discretionary
+WST,S&P 500,Health Care
+WTRG,Resto EE. UU.,Utilities
+WU,Resto EE. UU.,Industrials
+XPO,Resto EE. UU.,Industrials
+XYL,S&P 500,Industrials
+YETI,Resto EE. UU.,Industrials
+YUM,S&P 500,Consumer Discretionary
+ZBH,S&P 500,Health Care
+ZTS,S&P 500,Health Care
+WWD,Resto EE. UU.,Information Technology
+WYNN,S&P 500,Consumer Discretionary
+XEL,S&P 500,Utilities
+XRAY,Resto EE. UU.,Health Care
+ZBRA,S&P 500,Information Technology
+ZD,Resto EE. UU.,Communication Services
+ZG,Resto EE. UU.,Industrials
+ZION,Resto EE. UU.,Financials
+ZM,Resto EE. UU.,Information Technology
+ZS,Resto EE. UU.,Information Technology
+ZWS,Resto EE. UU.,Industrials
+COIN,S&P 500,Financials
+XYZ,S&P 500,Financials
+SGI,Resto EE. UU.,Industrials
+BRSL,Resto EE. UU.,Industrials
+MRSH,S&P 500,Financials
+P,S&P 500,Information Technology
+XLB,ETF,ETF
+XLC,ETF,ETF
+XLE,ETF,ETF
+XLF,ETF,ETF
+XLI,ETF,ETF
+XLP,ETF,ETF
+XLU,ETF,ETF
+XLV,ETF,ETF
+XLY,ETF,ETF
+TIP,ETF,ETF
+EMB,ETF,ETF
+EEM,ETF,ETF
+EFA,ETF,ETF
+EZU,ETF,ETF
+EWJ,ETF,ETF
+SLV,ETF,ETF
+VNQ,ETF,ETF
+PFF,ETF,ETF
+KRE,ETF,ETF
