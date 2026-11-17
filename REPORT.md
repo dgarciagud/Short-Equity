@@ -596,6 +596,23 @@ Ejemplos: Apple usa a 31-01-2024 el patrimonio de septiembre de 2023 (10-K prese
 
 **Robustez al retraso.** Con los datos contables retrasados 1 o 2 meses más (precio de *t*), la versión de 2 valores por grupo con ETF da 0,56 / 0,50 / 0,53 %/mes (Sharpe 0,85 / 0,72 / 0,72), y la de 3 valores, 0,41 / 0,42 / 0,54 %/mes (Sharpe 0,68 / 0,64 / 0,83). **El efecto no depende del momento exacto de la publicación.**
 
+### 12.i Beta de mercado: S&P 500 equiponderado (RSP) con la regla de tendencia EWMAC de Carver (`src/beta_ewmac.py`)
+
+**Señal (Carver):** cruces de medias exponenciales 8/32, 16/64, 32/128 y 64/256 días, divididos por la volatilidad del precio y escalados a una previsión media de ±10 (escalas 5,3 / 3,75 / 2,65 / 1,87), con tope ±20. Las cuatro se promedian, con un multiplicador de diversificación de previsiones de 1,12.
+
+**Posición:** previsión / 10, con tope 1 (Darwinex Zero no tiene apalancamiento). En la versión con volatilidad objetivo se multiplica por 16 % / volatilidad de RSP. Solo se opera cuando la posición cambia más de un 10 %. Coste de 3 pb por unidad negociada; la liquidez no cobra interés. Datos diarios de 2004 a 2026.
+
+| Variante | %/año | Vol. % | Sharpe | DD máx. | 2008 | 2020 | 2022 | Exposición media | Sharpe 2012-26 | Corr. SYY | Corr. value |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| SPY fijo (referencia) | 10,8 | 18,7 | 0,64 | −55 % | −37 % | +18 % | −18 % | 1,00 | – | – | – |
+| RSP fijo | 9,8 | 19,4 | 0,58 | −60 % | −40 % | +13 % | −12 % | 1,00 | 0,80 | −0,38 | 0,47 |
+| Tendencia, solo largo | 4,6 | 9,0 | 0,55 | −20 % | −4 % | −1 % | −12 % | 0,61 | 0,56 | −0,20 | 0,25 |
+| **Tendencia + vol. objetivo, solo largo** | 5,0 | 8,7 | **0,60** | **−17 %** | **−4 %** | −2 % | −11 % | 0,62 | 0,61 | −0,20 | 0,23 |
+| Tendencia, largo/corto | 1,4 | 14,0 | 0,17 | −36 % | +13 % | −13 % | −23 % | – | 0,11 | −0,04 | 0,13 |
+| Tendencia + vol. objetivo, largo/corto | 2,7 | 10,1 | 0,32 | −28 % | +3 % | −6 % | −19 % | – | 0,31 | −0,11 | 0,14 |
+
+**Lectura.** El filtro de tendencia mantiene el Sharpe de la beta fija en el periodo largo (0,60 frente a 0,58), pero **reduce la peor caída de −60 % a −17 %** y evita casi todo 2008. A cambio, rinde menos en los mercados alcistas sin interrupciones (2012-2026: Sharpe 0,61 frente a 0,80), porque está invertido de media un 62 % del tiempo y sale en correcciones rápidas como la de 2020. Ponerse corto en acciones con tendencia bajista no funciona (Sharpe 0,17-0,32): las acciones suben a largo plazo y los rebotes son bruscos. **Elegida: tendencia + volatilidad objetivo, solo largo, con posición máxima de 1.** Su correlación con SYY es −0,20 y con value sectorial 0,23, menor que la de RSP fijo (0,47).
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
