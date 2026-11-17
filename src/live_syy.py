@@ -73,6 +73,7 @@ CONCEPTS = {
     "cur_assets": ["AssetsCurrent"],
     "cur_liab": ["LiabilitiesCurrent"],
     "public_float": ["dei:EntityPublicFloat"],      # cover page of the 10-K, as of the last Q2 end
+    "op_income": ["OperatingIncomeLoss"],
 }
 FLOW = {"net_income", "cfo", "gross_profit", "revenue", "cogs", "shares"}
 
@@ -460,6 +461,8 @@ def main():
     if "shares" not in hold:
         hold["shares"] = np.nan
     hold["ticker"] = hold.ticker.astype(str).str.upper()
+    if "estrategia" in hold:          # whole-account file (live_portfolio.py): keep the SYY sleeve only
+        hold = hold[hold.estrategia.isin(["SYY", "SYY_cobertura"])]
     spy_held = hold.loc[hold.ticker == "SPY", "shares"].sum()
     holdings = [t for t in hold.ticker if t != "SPY"]
     ranked = df.loc[[t for t in cand.index if ok[t]] + [t for t in df.index if t not in cand.index]]
