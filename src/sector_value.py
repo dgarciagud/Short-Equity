@@ -38,7 +38,8 @@ SCORES = {   # score -> {characteristic: sign}; high score = long
 }
 SCORES["value+calidad"] = {**SCORES["value"], **SCORES["calidad"]}
 SCORE = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in SCORES else "value"
-OUT = data.ROOT / "results" / "recent" / f"{SCORE.replace('+', '_')}_sectorial"
+OUT = data.ROOT / "results" / "recent" / (f"{SCORE.replace('+', '_')}_sectorial"
+                                          + (f"_retraso{os.environ.get('FUND_LAG')}m" if os.environ.get("FUND_LAG") else ""))
 VAL = list(SCORES[SCORE])
 GROUP = {"Information Technology": "Tecnología y comunicaciones", "Communication Services": "Tecnología y comunicaciones",
          "Industrials": "Industriales", "Consumer Discretionary": "Consumo cíclico", "Health Care": "Salud",
@@ -46,14 +47,32 @@ GROUP = {"Information Technology": "Tecnología y comunicaciones", "Communicatio
          "Materials": "Materias primas", "Energy": "Materias primas"}
 
 
-def main():
-    OUT.mkdir(parents=True, exist_ok=True)
-    p = pd.read_parquet(PANEL, columns=["cik", "date", "fwd"] + VAL)
+FUND_LAG = int(os.environ.get("FUND_LAG", 0))   # robustness: accounting data N extra months old
+
+
+def load_panel():
+    raw = ["BE", "ni", "cfo", "rev", "op", "debt", "cash", "ME"]
+    cols = ["cik", "date", "fwd"] + VAL + (raw if FUND_LAG and SCORE == "value" else [])
+    p = pd.read_parquet(PANEL, columns=list(dict.fromkeys(cols)))
+    if FUND_LAG and SCORE == "value":
+        # accounting values of N months earlier (same company), market value of t
+        p = p.sort_values(["cik", "date"])
+        lagged = p.groupby("cik")[["BE", "ni", "cfo", "rev", "op", "debt", "cash"]].shift(FUND_LAG)
+        gap = p.groupby("cik").date.diff(FUND_LAG).dt.days
+        lagged = lagged.where(gap <= 31 * FUND_LAG + 5)
+        me = p.ME.where(p.ME > 0)
+        p["BM"], p["EP"], p["CFP"], p["SP"] = lagged.BE / me, lagged.ni / me, lagged.cfo / me, lagged.rev / me
+        p["EBITEV"] = lagged.op / (me + lagged.debt.fillna(0) - lagged.cash.fillna(0))
     sec = pd.read_parquet(data.ROOT / "results" / "recent" / "pit" / "panel.parquet", columns=["sector"])
     sec = sec.rename_axis("cik").reset_index().drop_duplicates(["cik"], keep="last").set_index("cik").sector
     p["sector"] = p.cik.map(sec)
     p["grupo"] = p.sector.map(GROUP)
-    p = p.dropna(subset=["grupo", "fwd"])
+    return p.dropna(subset=["grupo", "fwd"])
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True)
+    p = load_panel()
     pct = pd.concat([p.groupby(["date", "grupo"])[v].rank(pct=True, ascending=SCORES[SCORE][v] > 0)
                      for v in VAL], axis=1)
     p["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= max(3, len(VAL) // 2))
@@ -144,12 +163,7 @@ def main():
 def by_group(ks=(2, 3)):
     """Gross return of every sector group's sleeve: its k cheapest names vs the sector ETF, and
     k cheapest minus k dearest. Contribution to the book = group return / number of groups."""
-    p = pd.read_parquet(PANEL, columns=["cik", "date", "fwd"] + VAL)
-    sec = pd.read_parquet(data.ROOT / "results" / "recent" / "pit" / "panel.parquet", columns=["sector"])
-    sec = sec.rename_axis("cik").reset_index().drop_duplicates(["cik"], keep="last").set_index("cik").sector
-    p["sector"] = p.cik.map(sec)
-    p["grupo"] = p.sector.map(GROUP)
-    p = p.dropna(subset=["grupo", "fwd"])
+    p = load_panel()
     pct = pd.concat([p.groupby(["date", "grupo"])[v].rank(pct=True, ascending=SCORES[SCORE][v] > 0)
                      for v in VAL], axis=1)
     p["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= max(3, len(VAL) // 2))
