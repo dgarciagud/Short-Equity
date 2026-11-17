@@ -613,6 +613,28 @@ Ejemplos: Apple usa a 31-01-2024 el patrimonio de septiembre de 2023 (10-K prese
 
 **Lectura.** El filtro de tendencia mantiene el Sharpe de la beta fija en el periodo largo (0,60 frente a 0,58), pero **reduce la peor caída de −60 % a −17 %** y evita casi todo 2008. A cambio, rinde menos en los mercados alcistas sin interrupciones (2012-2026: Sharpe 0,61 frente a 0,80), porque está invertido de media un 62 % del tiempo y sale en correcciones rápidas como la de 2020. Ponerse corto en acciones con tendencia bajista no funciona (Sharpe 0,17-0,32): las acciones suben a largo plazo y los rebotes son bruscos. **Elegida: tendencia + volatilidad objetivo, solo largo, con posición máxima de 1.** Su correlación con SYY es −0,20 y con value sectorial 0,23, menor que la de RSP fijo (0,47).
 
+### 12.j Asignación entre estrategias con el método de Carver (`src/carver_allocation.py`)
+
+Tres estrategias, rentabilidades mensuales netas de 2012-2026 (177 meses):
+
+| | Vol. por unidad | Sharpe | Corr. SYY | Corr. value | Corr. beta |
+|---|---:|---:|---:|---:|---:|
+| SYY (10 cortos / SPY) | 11,9 % | 0,48 | 1 | −0,49 | −0,19 |
+| Value dentro del sector (3 por grupo / ETF) | 7,3 % | 0,63 | −0,49 | 1 | 0,23 |
+| Beta: RSP con tendencia EWMAC + vol. objetivo | 8,7 % | 0,62 | −0,19 | 0,23 | 1 |
+
+**Pesos de riesgo** (handcrafting): SYY 40 %, value 30 %, beta 30 %. El par más correlacionado (value-beta, 0,23) recibe algo menos de peso. **Multiplicador de diversificación (SDM): 2,14.** Es alto porque SYY está negativamente correlacionada con las otras dos.
+
+**Restricción de margen.** En Darwinex Zero cada posición inmoviliza el 100 % de su valor. Con un 90 % del capital como límite de margen, la volatilidad objetivo máxima de la cartera es **2,3 % anual**. Tamaños para 1.000.000 USD:
+
+| Estrategia | Tamaño | Margen |
+|---|---:|---:|
+| SYY | 165.000 USD por pata (cortos + SPY) | 330.000 |
+| Value | 201.000 USD por pata (acciones + ETF sectoriales) | 402.000 |
+| Beta | 169.000 USD como posición máxima en RSP (de media, ~62 % invertido) | ≤169.000 |
+
+**Backtest de la cartera combinada:** 0,23 %/mes, volatilidad 2,3 %, **Sharpe 1,21** y peor caída −2,9 %. SYY sola con el tamaño actual (0,45 por pata) da 0,21 %/mes, volatilidad 5,4 %, Sharpe 0,48 y peor caída −11,5 %. Por subperiodos, el Sharpe de la combinada es 1,71 / 0,90 / 1,09. La misma rentabilidad con menos de la mitad de riesgo; el DARWIN reescala después a su VaR objetivo, así que lo relevante es el Sharpe.
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
