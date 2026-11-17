@@ -582,6 +582,20 @@ La versión **solo de largos cubiertos con el ETF de su sector** es la mejor rel
 
 **Dentro de cada sector, calidad y rentabilidad no funcionan** en el S&P 500 equiponderado de 2012-2026. Solo ganan en 2017-2021 y pierden en 2012-16 y 2022-26. Por grupos, solo el financiero es algo positivo. Su correlación con SYY es positiva en las versiones larga/corta (0,2-0,4): SYY ya incorpora rentabilidad. Mezcladas con value **lo diluyen** (Sharpe 0,80 → 0,44-0,63), porque en cada sector las empresas de calidad suelen ser las caras. Confirma el §12.d de la rama Kelly: la prima de calidad/rentabilidad de 2012-2025 está en las mayores empresas ponderadas por capitalización, no en la empresa típica de cada sector. **Para la cartera se usa value dentro de cada sector, sin calidad.**
 
+**Auditoría point-in-time de los datos de value** (`src/check_value_pit.py`). Para cada empresa y mes del panel se busca en la caché de la SEC el primer informe que publicó el valor exacto usado:
+
+| Dato | Filas | Publicado DESPUÉS de *t* | Publicado el mismo día que *t* | Días desde la publicación (mediana / p10) | Antigüedad del periodo (mediana / p90) |
+|---|---:|---:|---:|---:|---:|
+| Patrimonio (B/M) | 78.851 | **0** | 1,9 % | 51 / 6 | 91 / 123 días |
+| Beneficio neto (E/P) | 74.393 | **0** | 0,5 % | 182 / 34 | 215 / 366 días |
+| Flujo de caja operativo (CF/P) | 74.392 | **0** | 0,5 % | 181 / 34 | 215 / 366 días |
+| Ventas (S/P) | 69.823 | **0** | 0,4 % | 181 / 34 | 215 / 366 días |
+| Beneficio operativo (EBIT/EV) | 57.851 | **0** | 0,4 % | 182 / 34 | 217 / 366 días |
+
+Ejemplos: Apple usa a 31-01-2024 el patrimonio de septiembre de 2023 (10-K presentado el 3-11-2023) y lo cambia a 29-02-2024 por el de diciembre (10-Q del 2-2-2024). JPMorgan usa a 31-01-2024 el beneficio de 2022 y pasa al de 2023 a 29-02-2024 (10-K del 16-2-2024).
+
+**Robustez al retraso.** Con los datos contables retrasados 1 o 2 meses más (precio de *t*), la versión de 2 valores por grupo con ETF da 0,56 / 0,50 / 0,53 %/mes (Sharpe 0,85 / 0,72 / 0,72), y la de 3 valores, 0,41 / 0,42 / 0,54 %/mes (Sharpe 0,68 / 0,64 / 0,83). **El efecto no depende del momento exacto de la publicación.**
+
 ---
 
 ## 13. Limitaciones y siguientes pasos
