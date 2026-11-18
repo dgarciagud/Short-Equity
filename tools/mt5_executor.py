@@ -60,25 +60,42 @@ def filling(info):
     return mt5.ORDER_FILLING_RETURN
 
 
+def spread_bps(tick):
+    if not tick or tick.bid <= 0 or tick.ask <= 0:
+        return None
+    return (tick.ask - tick.bid) / ((tick.ask + tick.bid) / 2) * 1e4
+
+
 def wait_spread(sym, max_bps, max_wait):
-    t0 = time.time()
+    t0, warned = time.time(), False
     while True:
         tick = mt5.symbol_info_tick(sym)
-        if tick and tick.bid > 0 and tick.ask > 0:
-            bps = (tick.ask - tick.bid) / ((tick.ask + tick.bid) / 2) * 1e4
-            if bps <= max_bps:
-                return tick
+        bps = spread_bps(tick)
+        if bps is not None and bps <= max_bps:
+            return tick
         if time.time() - t0 > max_wait:
             return None
-        if time.time() - t0 < 6:
-            print(f"  {sym}: spread demasiado amplio o sin cotización; espero hasta {max_wait} s...", flush=True)
+        if not warned:
+            when = dt.datetime.fromtimestamp(tick.time).strftime("%d/%m %H:%M") if tick else "nunca"
+            what = f"spread {bps:.0f} pb" if bps is not None else "sin bid/ask"
+            print(f"  {sym}: {what} (último tick {when}, hora servidor); espero hasta {max_wait} s...", flush=True)
+            warned = True
         time.sleep(5)
 
 
 def send(sym, side, volume, args, position=None, label=""):
     """Market order; with `position` it closes (part of) that ticket."""
     info = mt5.symbol_info(sym)
-    tick = wait_spread(sym, args.max_spread_pb, args.espera_spread)
+    if not args.ejecutar:                       # simulation: no waiting, just report the spread
+        tick = mt5.symbol_info_tick(sym)
+        bps = spread_bps(tick)
+        if bps is None:
+            log(sym, label, volume, 0, "SIMULADA (sin cotización ahora)")
+            return True
+        if bps > args.max_spread_pb:
+            label = f"{label} [spread {bps:.0f} pb]"
+    else:
+        tick = wait_spread(sym, args.max_spread_pb, args.espera_spread)
     if tick is None:
         log(sym, label, volume, 0, f"OMITIDA: spread > {args.max_spread_pb} pb")
         return False
@@ -90,6 +107,9 @@ def send(sym, side, volume, args, position=None, label=""):
     if position is not None:
         req["position"] = position
     chk = mt5.order_check(req)
+    if not args.ejecutar and chk is not None and chk.retcode == 10019 and label.startswith(("ABRIR", "AMPLIAR")):
+        log(sym, label, volume, price, "SIMULADA (margen: se libera con los cierres/reducciones previos)")
+        return True
     if chk is None or chk.retcode != 0:
         log(sym, label, volume, price, f"RECHAZADA en la comprobación: {getattr(chk, 'comment', mt5.last_error())}")
         return False
