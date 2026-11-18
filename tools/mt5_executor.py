@@ -70,6 +70,8 @@ def wait_spread(sym, max_bps, max_wait):
                 return tick
         if time.time() - t0 > max_wait:
             return None
+        if time.time() - t0 < 6:
+            print(f"  {sym}: spread demasiado amplio o sin cotización; espero hasta {max_wait} s...", flush=True)
         time.sleep(5)
 
 
@@ -128,9 +130,12 @@ def main():
     ap.add_argument("--tolerancia", type=float, default=0.05)
     ap.add_argument("--max-spread-pb", type=float, default=40)
     ap.add_argument("--espera-spread", type=int, default=120, help="seconds")
+    ap.add_argument("--terminal", help="ruta de terminal64.exe si hay varios MT5 instalados")
     args = ap.parse_args()
 
-    if not mt5.initialize():
+    print("Conectando con MT5...", flush=True)
+    ok = mt5.initialize(path=args.terminal, timeout=60000) if args.terminal else mt5.initialize(timeout=60000)
+    if not ok:
         sys.exit(f"No conecta con MT5: {mt5.last_error()}. ¿Está abierto y con sesión iniciada?")
     acc = mt5.account_info()
     if acc.login != args.cuenta:
