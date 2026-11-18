@@ -118,7 +118,12 @@ def send(sym, side, volume, args, position=None, label=""):
         return True
     res = mt5.order_send(req)
     ok = res is not None and res.retcode == mt5.TRADE_RETCODE_DONE
-    log(sym, label, volume, res.price if ok else price,
+    fill = res.price if ok else price
+    if ok and not fill and res.deal:            # Darwinex returns price 0: read it from the deal
+        time.sleep(0.5)
+        deals = mt5.history_deals_get(ticket=res.deal)
+        fill = deals[0].price if deals else price
+    log(sym, label, volume, fill,
         "OK" if ok else f"ERROR {getattr(res, 'retcode', '')} {getattr(res, 'comment', mt5.last_error())}")
     return ok
 
