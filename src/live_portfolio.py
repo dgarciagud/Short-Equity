@@ -2,9 +2,11 @@
 
 Sizes come from the Carver allocation (results/recent/asignacion_carver.csv, units per unit of
 equity; see carver_allocation.py):
-  SYY    10 overpriced shorts (live_syy.py rule: max 3 per sector, max 3 changes a week) at
+  SYY    10 overpriced shorts (live_syy.py rule: max 3 per sector, max 3 changes a week, a held
+         short stays while it ranks within the top 20) at
          units x capital / 10 each, hedged with the same value in SPY
-  value  3 cheapest S&P 500 members of each of the 7 sector groups (sector_value.py score: B/M, E/P,
+  value  3 cheapest S&P 500 members of each of the 7 sector groups (a held name stays while it is
+         within the cheapest 8 of its group) (sector_value.py score: B/M, E/P,
          CF/P, S/P, EBIT/EV ranked inside the group), units x capital / 21 each, each one hedged
          with a short in its sector SPDR
   beta   RSP long, units x capital x position, position = Carver EWMAC forecast / 10 x 16 % / vol
@@ -32,6 +34,7 @@ from sector_value import GROUP, VAL
 from sector_hedge import ETF
 
 MAX_SHARES = 1000
+VALUE_BUFFER = 8         # a held value name leaves only when it ranks worse than 8th in its group
 MIN_TRADE = 0.05          # skip a resize smaller than 5 % of the target position
 
 
@@ -50,8 +53,10 @@ def live_prices(syms):
     return last, p.index[-1]
 
 
-def value_picks(asof, members, tradable_syms, exclude, n_per_group=3):
-    """3 cheapest tradable members of every sector group, with point-in-time SEC data."""
+def value_picks(asof, members, tradable_syms, exclude, n_per_group=3, held=(), buffer=VALUE_BUFFER):
+    """3 cheapest tradable members of every sector group, with point-in-time SEC data. A name
+    already held (MT5 symbols in `held`) stays while it ranks within the cheapest `buffer` of its
+    group and has no merger filing (exit buffer, turnover_buffers.py)."""
     sp = members.assign(mt5=members.symbol.str.replace(".", "", regex=False))
     sp = sp[sp.mt5.isin(tradable_syms) & sp.sector.isin(GROUP) & ~sp.mt5.isin(exclude)]
     cmap = dict(zip(sp.symbol, sp.cik.astype(int)))
@@ -84,10 +89,16 @@ def value_picks(asof, members, tradable_syms, exclude, n_per_group=3):
     pct = pd.concat([sp.groupby("grupo")[v].rank(pct=True) for v in VAL], axis=1)
     sp["V"] = pct.mean(axis=1).where(pct.notna().sum(axis=1) >= 3)
     sp = sp.dropna(subset=["V"]).reset_index()
-    pool = sp.sort_values("V", ascending=False).groupby("grupo").head(3 * n_per_group)
+    sp["puesto_grupo"] = sp.groupby("grupo").V.rank(ascending=False, method="first")
+    sp["en_cartera"] = sp.mt5.isin(set(held))
+    pool = sp[(sp.puesto_grupo <= max(3 * n_per_group, buffer)) | sp.en_cartera]
     flags = mna_flags(pool.cik, (pd.Timestamp(asof) - timedelta(days=180)).date().isoformat())
     pool = pool[pool.cik.map(flags) == ""]
-    picks = pool.sort_values("V", ascending=False).groupby("grupo").head(n_per_group)
+    picks = []
+    for _, g in pool.sort_values("V", ascending=False).groupby("grupo"):
+        keep = g[g.en_cartera & (g.puesto_grupo <= buffer)].head(n_per_group)
+        picks.append(pd.concat([keep, g[~g.index.isin(keep.index)].head(n_per_group - len(keep))]))
+    picks = pd.concat(picks)
     picks["etf"] = picks.sector.map(ETF)
     return picks, sp
 
@@ -137,7 +148,8 @@ def main():
     members = current_members()
 
     # 2. value picks (never a name that SYY is short)
-    picks, scored = value_picks(stamp, members, trad, {t.replace(".", "") for t in syy_names})
+    picks, scored = value_picks(stamp, members, trad, {t.replace(".", "") for t in syy_names},
+                                held=h.loc[h.estrategia == "value", "ticker"])
 
     # 3. beta
     prev = h[h.estrategia == "beta"]
@@ -213,7 +225,7 @@ def main():
         tt = tgt.assign(precio=tgt.ticker.map(px), USD=lambda d: d.signed * d.precio)
         fh.write(tt.round(2).to_markdown(index=False) + "\n\n")
         fh.write("## Value: selección por grupo\n\n")
-        cols = ["grupo", "symbol", "name", "sector", "V", "BM", "EP", "CFP", "SP", "EBITEV", "etf"]
+        cols = ["grupo", "symbol", "name", "sector", "V", "puesto_grupo", "en_cartera", "BM", "EP", "CFP", "SP", "EBITEV", "etf"]
         fh.write(picks[cols].round(3).to_markdown(index=False) + "\n")
     print(open(LIVE / f"ordenes_cartera_{stamp}.md").read())
 

@@ -282,16 +282,28 @@ def sector_capped(df, n, cap=3):
     return df.loc[picked]
 
 
-def trade_list(df, holdings, n=N_SHORT, max_changes=3):
-    """Weekly rule (no buffer, as in the backtest): hold the top n; replace at most
-    `max_changes` names per week, worst-ranked first."""
+def trade_list(df, holdings, n=N_SHORT, max_changes=3, buffer=None, raw_rank=None, blocked=(), cap=3):
+    """Weekly rule: a held short stays while its raw rank (all members, by M) is within `buffer`
+    and it is not blocked (merger filing, price); otherwise it is replaced, at most `max_changes`
+    names per week, worst first. Free slots are filled in ranking order keeping `cap` per sector.
+    buffer = n reproduces the old rule (hold only the top n). See turnover_buffers.py."""
+    buffer = buffer or n
+    raw_rank = df.rank_sobrevalorada if raw_rank is None else raw_rank
     held = [h for h in holdings if h in df.index]
-    rk = df.rank_sobrevalorada
-    out = sorted([h for h in held if rk[h] > n], key=lambda h: -rk[h])
+    bad = [h for h in held if raw_rank.get(h, np.inf) > buffer or h in blocked]
+    out = sorted(bad, key=lambda h: -raw_rank.get(h, np.inf))
     gone = [h for h in holdings if h not in df.index]
     out = gone + out[: max(0, max_changes - len(gone))]
     keep = [h for h in holdings if h not in out]
-    new = [t for t in rk.sort_values().index if t not in keep][: n - len(keep)]
+    cnt = df.loc[[k for k in keep if k in df.index]].sector.value_counts().to_dict()
+    new = []
+    for t in df.rank_sobrevalorada.sort_values().index:
+        if len(keep) + len(new) >= n:
+            break
+        if t in keep or t in blocked or cnt.get(df.at[t, "sector"], 0) >= cap:
+            continue
+        new.append(t)
+        cnt[df.at[t, "sector"]] = cnt.get(df.at[t, "sector"], 0) + 1
     return out, new
 
 
@@ -391,6 +403,8 @@ def main():
     ap.add_argument("--currency", choices=["EUR", "USD"], default="EUR")
     ap.add_argument("--gross", type=float, default=1.0, help="short notional / equity (same for the SPY long)")
     ap.add_argument("--max-changes", type=int, default=3, help="max replacements per week")
+    ap.add_argument("--buffer", type=int, default=20,
+                    help="a held short leaves only when its rank is worse than this (10 = no buffer)")
     ap.add_argument("--max-shares", type=int, default=1000, help="broker limit of shares per stock")
     ap.add_argument("--risk-cap", type=float, default=0.25, help="warn when a short exceeds this share of risk")
     ap.add_argument("--hedge", default="SPY:1", help="hedge split for the MT5 order file, e.g. SPY:0.5,RSP:0.5")
@@ -467,7 +481,10 @@ def main():
     holdings = [t for t in hold.ticker if t != "SPY"]
     ranked = df.loc[[t for t in cand.index if ok[t]] + [t for t in df.index if t not in cand.index]]
     ranked = ranked.assign(rank_sobrevalorada=np.arange(1, len(ranked) + 1))
-    out, new = trade_list(ranked, holdings, max_changes=args.max_changes)
+    raw_rank = df.M.rank(ascending=False, method="first").fillna(np.inf)
+    blocked = set(pool.index[~good])
+    out, new = trade_list(ranked, holdings, max_changes=args.max_changes, buffer=args.buffer,
+                          raw_rank=raw_rank, blocked=blocked)
     # Staggered build: replacements one-for-one, plus at most `build` names into empty slots.
     build = args.build if args.build is not None else (4 if not holdings else args.max_changes)
     empty = max(0, N_SHORT - len([h for h in holdings if h in df.index]))
