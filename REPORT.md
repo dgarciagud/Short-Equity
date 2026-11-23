@@ -683,3 +683,31 @@ Da, Gurun y Warachka (2014), *Frog in the Pan*, RFS · Moskowitz y Grinblatt (19
 Yu y Yuan (2015), *Arbitrage Asymmetry and the Idiosyncratic Volatility Puzzle*, JF · Chen, Pelger y
 Zhu (2020), *Deep Learning in Asset Pricing* (datos) · Baker y Wurgler (2006), JF (índice de
 sentimiento) · Jansen, *Machine Learning for Trading* (repo de datos y librerías).
+
+### 12.k Reducir la rotación: colchón de salida y frecuencia de rebalanceo (`src/turnover_buffers.py`)
+
+Backtest point-in-time del S&P 500 2012-2026 con costes de Zero. Un valor ya en cartera solo sale cuando su puesto empeora más allá de B. Los huecos se rellenan con los mejores (en SYY se mantiene el máximo de 3 por sector). B igual al tamaño de la cartera es la regla actual; reproduce los backtests base con una correlación de 0,99.
+
+| SYY (10 cortos / SPY) | %/año | Sharpe | DD máx | rotación/mes |
+|---|---:|---:|---:|---:|
+| sale si puesto > 10 (actual) | 5,7 | 0,48 | −24,9 % | 22,5 % |
+| sale si puesto > 15 | 5,6 | 0,46 | −26,4 % | 15,3 % |
+| sale si puesto > 20 | 6,0 | 0,51 | −22,8 % | 12,8 % |
+| sale si puesto > 30 | 2,7 | 0,22 | −29,6 % | 10,9 % |
+| rebalanceo cada 3 meses | 6,1 | 0,51 | −19,5 % | 15,2 % |
+
+| Value (3 por grupo / ETF) | %/año | Sharpe | DD máx | rotación/mes |
+|---|---:|---:|---:|---:|
+| sale si puesto > 3 (actual) | 5,3 | 0,70 | −14,5 % | 13,6 % |
+| sale si puesto > 5 | 5,4 | 0,80 | −12,3 % | 5,7 % |
+| sale si puesto > 7 | 6,2 | 1,01 | −6,6 % | 4,1 % |
+| sale si puesto > 8 | 6,7 | 1,11 | −5,7 % | 3,8 % |
+| sale si puesto > 10 | 7,7 | 1,31 | −6,3 % | 3,4 % |
+| sale si puesto > 15 | 7,5 | 1,25 | −7,6 % | 2,6 % |
+| rebalanceo cada 2 / 3 meses | 4,2 / 5,1 | 0,53 / 0,66 | −17,7 % | 9,9 / 8,2 % |
+
+Conclusiones:
+
+- **SYY.** El colchón apenas cambia el resultado. Hasta el puesto 20, lo que se ahorra en costes se pierde en señal. Con un colchón de 20 la rotación baja a algo más de la mitad, con el mismo Sharpe. Con 30, la señal se degrada.
+- **Value.** El colchón mejora la estrategia en los tres subperiodos (Sharpe con B = 8: 1,18 / 0,86 / 1,36, frente a 1,12 / 0,37 / 0,90 con la regla actual). La mejora no viene solo de los costes, sino sobre todo del retorno bruto. Value es una señal lenta: sacar un valor porque baja del 3.º al 4.º puesto es rotar por ruido. El rendimiento sube hasta B ≈ 10 y luego se estabiliza.
+- **Espaciar el rebalanceo (cada 2–3 meses) es peor que un colchón.** Reduce menos la rotación y empeora el Sharpe, sobre todo en value.

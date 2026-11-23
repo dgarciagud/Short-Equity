@@ -1,0 +1,16 @@
+cartera,%/año,sharpe,max_dd_%,rotación_%mes,USD_operados/año
+"SYY: salir si puesto >10, rebalanceo cada 1 m",5.7055,0.4760,-24.8827,22.5424,892136.9492
+"SYY: salir si puesto >12, rebalanceo cada 1 m",5.6353,0.4613,-27.5217,18.5311,733385.7627
+"SYY: salir si puesto >15, rebalanceo cada 1 m",5.5989,0.4616,-26.3585,15.2542,603701.6949
+"SYY: salir si puesto >20, rebalanceo cada 1 m",5.9460,0.5079,-22.8251,12.7684,505320.6780
+"SYY: salir si puesto >30, rebalanceo cada 1 m",2.6824,0.2193,-29.6079,10.9040,431534.9153
+"SYY: salir si puesto >10, rebalanceo cada 2 m",5.3985,0.4314,-25.9425,17.5706,695374.9153
+"SYY: salir si puesto >10, rebalanceo cada 3 m",6.0592,0.5116,-19.4902,15.1977,601465.7627
+"SYY: salir si puesto >15, rebalanceo cada 2 m",5.4022,0.4444,-23.8483,13.7853,545567.4576
+"value: salir si puesto >3 del grupo, rebalanceo cada 1 m",5.3467,0.7031,-14.4672,13.5862,654747.3769
+"value: salir si puesto >4 del grupo, rebalanceo cada 1 m",5.3769,0.7391,-14.3995,8.0441,387662.3083
+"value: salir si puesto >5 del grupo, rebalanceo cada 1 m",5.4168,0.7974,-12.2832,5.7035,274864.2454
+"value: salir si puesto >7 del grupo, rebalanceo cada 1 m",6.2005,1.0062,-6.5931,4.1431,199665.5367
+"value: salir si puesto >3 del grupo, rebalanceo cada 2 m",4.1652,0.5325,-17.6576,9.8736,475826.3115
+"value: salir si puesto >3 del grupo, rebalanceo cada 3 m",5.1285,0.6558,-17.7135,8.2055,395441.4851
+"value: salir si puesto >5 del grupo, rebalanceo cada 2 m",4.9620,0.7255,-13.7107,5.1386,247637.1267
